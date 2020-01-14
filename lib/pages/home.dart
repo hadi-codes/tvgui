@@ -1,3 +1,4 @@
+import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ijkplayer/flutter_ijkplayer.dart';
 import 'package:hive/hive.dart';
@@ -6,6 +7,10 @@ import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 // import 'package:auto_orientation/auto_orientation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+
+import 'bottomNavBar.dart';
+import 'bottomNavBar.dart';
+import 'setting.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({
@@ -24,8 +29,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
+  PageController _pageController;
   Orientation get orientation => MediaQuery.of(context).orientation;
   IjkMediaController mediaController = IjkMediaController();
+  int _currentIndex = 1;
 
   List _categories = [
     // "Popular",
@@ -70,6 +77,7 @@ class _MyHomePageState extends State<MyHomePage>
     _tabController = new TabController(vsync: this, length: tabs.length);
     //BackButtonInterceptor.add(myInterceptor);
     super.initState();
+    _pageController = PageController();
   }
 
   @override
@@ -82,6 +90,7 @@ class _MyHomePageState extends State<MyHomePage>
     WidgetsBinding.instance.removeObserver(this);
 
     super.dispose();
+    _pageController.dispose();
   }
 
   @override
@@ -121,67 +130,71 @@ class _MyHomePageState extends State<MyHomePage>
         ),
       ),
       child: Scaffold(
-          appBar: PreferredSize(
-              preferredSize: Size.fromHeight(10.0), // here the desired height
-              child: AppBar(
-                  // ...
-                  )),
-          body: Column(children: <Widget>[
-            AspectRatio(
-              aspectRatio: 1280 / 720,
-              child: topWidget,
-            ),
-            Flexible(
+        appBar: PreferredSize(
+            preferredSize: Size.fromHeight(10.0), // here the desired height
+            child: AppBar(
+                // ...
+                )),
+        body: Column(children: <Widget>[
+          AspectRatio(
+            aspectRatio: 1280 / 720,
+            child: topWidget,
+          ),
+          Flexible(
 
-                // this will host our Tab Views
-                child: new Scaffold(
-              appBar: PreferredSize(
-                preferredSize: Size.fromHeight(50.0),
-                child: AppBar(
-                  elevation: 1.0,
-                  bottom: new TabBar(
-                    isScrollable: true,
-                    unselectedLabelColor: AppColorGray,
-                    labelColor: AppColorYellow,
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    indicator: new BubbleTabIndicator(
-                      indicatorHeight: 35.0,
-                      indicatorColor: PrimaryColor,
-                      tabBarIndicatorSize: TabBarIndicatorSize.tab,
-                    ),
-                    tabs: tabs,
-                    controller: _tabController,
+              // this will host our Tab Views
+              child: new Scaffold(
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(50.0),
+              child: AppBar(
+                elevation: 1.0,
+                bottom: new TabBar(
+                  isScrollable: true,
+                  unselectedLabelColor: AppColorGray,
+                  labelColor: AppColorYellow,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicator: new BubbleTabIndicator(
+                    indicatorHeight: 35.0,
+                    indicatorColor: PrimaryColor,
+                    tabBarIndicatorSize: TabBarIndicatorSize.tab,
                   ),
+                  tabs: tabs,
+                  controller: _tabController,
                 ),
               ),
-              body: new TabBarView(
-                controller: _tabController,
-                children: tabs.map((Tab tab) {
-                  return new Container(child: _buildBody(tab.text));
-                }).toList(),
-              ),
-            ))
-          ]),
-          bottomNavigationBar: BottomNavigationBar(
-            onTap: (index) {},
-            elevation: 100.0,
-            currentIndex: 1,
-            backgroundColor: PrimaryColor,
-            unselectedItemColor: Colors.white,
-            selectedItemColor: Colors.yellow,
-            items: [
-              BottomNavigationBarItem(
-                  icon: new Icon(Icons.search), title: new Text('Search')),
-              BottomNavigationBarItem(
-                  icon: new Icon(Icons.tv), title: new Text('Channles')),
-              BottomNavigationBarItem(
-                icon: new Icon(Icons.settings),
-                title: new Text(
-                  "Settings",
-                ),
-              )
-            ],
-          )),
+            ),
+            body: new TabBarView(
+              controller: _tabController,
+              children: tabs.map((Tab tab) {
+                return new Container(child: _buildBody(tab.text));
+              }).toList(),
+            ),
+          ))
+        ]),
+
+
+        // bottomNavigationBar: BottomNavigationBar(
+
+        //   onTap: (index) {},
+        //               elevation: 100.0,
+        //               currentIndex: 1,
+        //               backgroundColor: PrimaryColor,
+        //               unselectedItemColor: Colors.white,
+        //               selectedItemColor: Colors.yellow,
+        //               items: [
+        //                 BottomNavigationBarItem(
+        //                     icon: new Icon(Icons.search), title: new Text('Search')),
+        //                 BottomNavigationBarItem(
+        //                     icon: new Icon(Icons.tv), title: new Text('Channles')),
+        //                 BottomNavigationBarItem(
+        //                   icon: new Icon(Icons.settings),
+        //                   title: new Text(
+        //                     "Settings",
+        //                   ),
+        //                 )
+        //               ],
+        //             )
+      ),
     );
   }
 

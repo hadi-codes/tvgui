@@ -4,6 +4,9 @@ import 'package:tvgui/model/fetch_channels.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:tvgui/pages/home.dart';
 
+import 'bottomNavBar.dart';
+import 'home.dart';
+
 class WelcomFetch extends StatelessWidget {
   
   const WelcomFetch({Key key}) : super(key: key);
@@ -34,8 +37,8 @@ class WelcomFetch extends StatelessWidget {
                 );
               } else
               
-              return MyHomePage(
-                title: 'Home',
+              return BottomNavBar(
+                //title: 'Home',
               //  cache: snapshot.data,
               );
             },

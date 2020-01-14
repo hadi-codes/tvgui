@@ -5,6 +5,8 @@ import 'package:tvgui/pages/bottomNavBar.dart';
 import 'package:tvgui/pages/setting.dart';
 import 'package:tvgui/pages/welcom_fetch.dart';
 
+import 'pages/welcom_fetch.dart';
+
 void main() {
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +28,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Home',
       theme: appTheme(),
-      home: BottomNavBarPage(),
+      home: WelcomFetch(),
     );
   }
 }
