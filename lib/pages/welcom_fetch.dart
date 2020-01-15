@@ -31,7 +31,7 @@ class WelcomFetch extends StatelessWidget {
                         height: 30,
                         child: LoadingIndicator(
                           indicatorType: Indicator.ballPulseRise,
-                          color: ThemeDate.AppYellow,
+                          color: AppThemeData.AppYellow,
                         ))
                   ],
                 );

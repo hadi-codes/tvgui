@@ -55,7 +55,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
       ),
       bottomNavigationBar: BottomNavyBar(
         itemCornerRadius: 70,
-        backgroundColor: ThemeDate.PrimaryColor,
+        backgroundColor: AppThemeData.PrimaryColor,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         selectedIndex: _currentIndex,
         onItemSelected: (index) {
@@ -66,20 +66,20 @@ class _BottomNavBarState extends State<BottomNavBar> {
         items: <BottomNavyBarItem>[
           BottomNavyBarItem(
               textAlign: TextAlign.center,
-              activeColor: ThemeDate.AppYellow,
-              inactiveColor: ThemeDate.AppGray,
+              activeColor: AppThemeData.AppYellow,
+              inactiveColor: AppThemeData.AppGray,
               icon: new Icon(Icons.search),
               title: new Text('Search')),
           BottomNavyBarItem(
               textAlign: TextAlign.center,
-              activeColor: ThemeDate.AppYellow,
-              inactiveColor: ThemeDate.AppGray,
+              activeColor: AppThemeData.AppYellow,
+              inactiveColor: AppThemeData.AppGray,
               icon: new Icon(Icons.tv),
               title: new Text('Channles')),
           BottomNavyBarItem(
             textAlign: TextAlign.center,
-            activeColor: ThemeDate.AppYellow,
-            inactiveColor: ThemeDate.AppGray,
+            activeColor: AppThemeData.AppYellow,
+            inactiveColor: AppThemeData.AppGray,
             icon: new Icon(Icons.settings),
             title: new Text(
               "Settings",

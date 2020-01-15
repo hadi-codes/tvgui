@@ -41,8 +41,8 @@ class _SettingsPageState extends State<SettingsPage> {
       body: Column(
         children: <Widget>[
           new SwitchListTile(
-            activeColor: ThemeDate.AppYellow,
-            inactiveThumbColor: ThemeDate.AppGray,
+            activeColor: AppThemeData.AppYellow,
+            inactiveThumbColor: AppThemeData.AppGray,
             inactiveTrackColor: Colors.grey,
             title: const Text(
               'Play in Background',
@@ -57,7 +57,7 @@ class _SettingsPageState extends State<SettingsPage> {
             },
             secondary: const Icon(
               Icons.play_circle_filled,
-              color: ThemeDate.AppYellow,
+              color: AppThemeData.AppYellow,
             ),
           ),
         ],
