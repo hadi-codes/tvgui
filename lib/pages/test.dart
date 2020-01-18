@@ -1,236 +1,120 @@
 // import 'package:flutter/material.dart';
-// import 'package:flutter_ijkplayer/flutter_ijkplayer.dart';
+// import 'package:dio/dio.dart';
 
-// class FullScreen extends StatefulWidget {
+
+// class Search extends StatefulWidget {
+//   // ExamplePage({ Key key }) : super(key: key);
 //   @override
-//   _FullScreenState createState() => _FullScreenState();
+//   _SearchState createState() => new _SearchState();
 // }
 
-// class _FullScreenState extends State<FullScreen> {
-//   var controller = IjkMediaController();
+// class _SearchState extends State<Search> {
+//  // final formKey = new GlobalKey<FormState>();
+//  // final key = new GlobalKey<ScaffoldState>();
+//   final TextEditingController _filter = new TextEditingController();
+//   final dio = new Dio();
+//   String _searchText = "";
+//   List names = new List();
+//   List filteredNames = new List();
+//   Icon _searchIcon = new Icon(Icons.search);
+//   Widget _appBarTitle = new Text( 'Search Example' );
 
-//   Orientation get orientation => MediaQuery.of(context).orientation;
-//   DataSource source = DataSource.network(
-//     "https://www.sample-videos.com/video123/mp4/360/big_buck_bunny_360p_30mb.mp4",
-//   );
+//   _SearchState() {
+//     _filter.addListener(() {
+//       if (_filter.text.isEmpty) {
+//         setState(() {
+//           _searchText = "";
+//           filteredNames = names;
+//         });
+//       } else {
+//         setState(() {
+//           _searchText = _filter.text;
+//         });
+//       }
+//     });
+//   }
 
 //   @override
 //   void initState() {
+//     this._getNames();
 //     super.initState();
-//     controller.setDataSource(source, autoPlay: true);
 //   }
 
-//   @override
-//   void dispose() {
-//     controller?.dispose();
-//     super.dispose();
-//   }
-
-//   @override
 //   Widget build(BuildContext context) {
-//     if (orientation == Orientation.landscape) {
-//       return _buildFullScreenPlayer();
-//     }
 //     return Scaffold(
-//       appBar: AppBar(
-//         title: Text("currentI18n.autoFullScreenTitle"),
+//       appBar: _buildBar(context),
+//       body: Container(
+//         child: _buildList(),
 //       ),
-//       body: ListView(
-//         children: <Widget>[
-//           _buildPlayerItem(),
-//         ],
+//       resizeToAvoidBottomPadding: false,
+//     );
+//   }
+
+//   Widget _buildBar(BuildContext context) {
+//     return new AppBar(
+//       centerTitle: true,
+//       title: _appBarTitle,
+//       leading: new IconButton(
+//         icon: _searchIcon,
+//         onPressed: _searchPressed,
+
 //       ),
 //     );
 //   }
 
-//   _buildPlayerItem() {
-//     return Container(
-//       height: 200,
-//       child: IjkPlayer(
-//         mediaController: controller,
-//       ),
-//     );
-//   }
-
-//   _buildFullScreenPlayer() {
-//     var data = MediaQuery.of(context);
-//     return Material(
-//       child: Container(
-//         width: data.size.width,
-//         height: data.size.height,
-//         child: IjkPlayer(
-//           mediaController: controller,
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// class FullScreen2 extends StatefulWidget {
-//   @override
-//   _FullScreen2State createState() => _FullScreen2State();
-// }
-
-// class _FullScreen2State extends State<FullScreen2> {
-//   var controller = IjkMediaController();
-
-//   Orientation get orientation => MediaQuery.of(context).orientation;
-//   DataSource source = DataSource.network(
-//     "https://www.sample-videos.com/video123/mp4/360/big_buck_bunny_360p_30mb.mp4",
-//   );
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     portraitUp();
-//   }
-
-//   @override
-//   void dispose() {
-//     controller.dispose();
-//     unlockOrientation();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     if (orientation == Orientation.landscape) {
-//       return buildLandscape();
-//     }
-//     return buildNormal();
-//   }
-
-//   Widget buildLandscape() {
-//     // SystemChrome.setEnabledSystemUIOverlays([]);
-//     // OrientationPlugin.setEnabledSystemUIOverlays([]);
-//     return WillPopScope(
-//       child: Scaffold(
-//         body: Stack(
-//           children: <Widget>[
-//             IjkPlayer(
-//               mediaController: controller,
-//             ),
-//             Container(
-//               height: 44.0,
-//               width: 44.0,
-//               child: IconButton(
-//                 icon: Icon(
-//                   Icons.fullscreen_exit,
-//                   color: Colors.white,
-//                 ),
-//                 onPressed: portraitUp,
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//       onWillPop: () async {
-//         if (orientation == Orientation.landscape) {
-//           portraitUp();
-//           return false;
+//   Widget _buildList() {
+//     if (!(_searchText.isEmpty)) {
+//       List tempList = new List();
+//       for (int i = 0; i < filteredNames.length; i++) {
+//         if (filteredNames[i]['name'].toLowerCase().contains(_searchText.toLowerCase())) {
+//           tempList.add(filteredNames[i]);
 //         }
-//         return true;
+//       }
+//       filteredNames = tempList;
+//     }
+//     return ListView.builder(
+//       itemCount: names == null ? 0 : filteredNames.length,
+//       itemBuilder: (BuildContext context, int index) {
+//         return new ListTile(
+//           title: Text(filteredNames[index]['name']),
+//           onTap: () => print(filteredNames[index]['name']),
+//         );
 //       },
 //     );
 //   }
 
-//   Widget buildNormal() {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text("currentI18n.changeFullScreenWithButton"),
-//       ),
-//       body: ListView(
-//         children: <Widget>[
-//           AspectRatio(
-//             aspectRatio: 1,
-//             child: IjkPlayer(
-//               mediaController: controller,
-//               controllerWidgetBuilder: (ctl) {
-//                 return DefaultIJKControllerWidget(
-//                   controller: ctl,
-//                   verticalGesture: false,
-//                 );
-//               },
-//             ),
+//   void _searchPressed() {
+//     setState(() {
+//       if (this._searchIcon.icon == Icons.search) {
+//         this._searchIcon = new Icon(Icons.close);
+//         this._appBarTitle = new TextField(
+//           controller: _filter,
+//           decoration: new InputDecoration(
+//             prefixIcon: new Icon(Icons.search),
+//             hintText: 'Search...'
 //           ),
-//           RaisedButton(
-//             onPressed: () async {
-//               await controller.setDataSource(source);
-//               await controller.play();
-//             },
-//             child: Text("currentI18n.play"),
-//           ),
-//           RaisedButton(
-//             onPressed: setLandScapeLeft,
-//             child: Text("currentI18n.fullScreen"),
-//           ),
-//         ],
-//       ),
-//     );
+//         );
+//       } else {
+//         this._searchIcon = new Icon(Icons.search);
+//         this._appBarTitle = new Text( 'Search Example' );
+//         filteredNames = names;
+//         _filter.clear();
+//       }
+//     });
 //   }
 
-//   setLandScapeLeft() async {
-//     await IjkManager.setLandScape();
+//   void _getNames() async {
+//     final response = await dio.get('https://swapi.co/api/people');
+//     List tempList = new List();
+//     for (int i = 0; i < response.data['results'].length; i++) {
+//       tempList.add(response.data['results'][i]);
+//     }
+//     setState(() {
+//       names = tempList;
+//       names.shuffle();
+//       filteredNames = names;
+//     });
 //   }
 
-//   portraitUp() async {
-//     await IjkManager.setPortrait();
-//   }
 
-//   unlockOrientation() async {
-//     await IjkManager.unlockOrientation();
-//   }
-// }
-
-// class CustomFullControllerPage extends StatefulWidget {
-//   @override
-//   _CustomFullControllerPageState createState() =>
-//       _CustomFullControllerPageState();
-// }
-
-// class _CustomFullControllerPageState extends State<CustomFullControllerPage> {
-//   IjkMediaController controller;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     controller = IjkMediaController();
-//     controller.setDataSource(
-//       DataSource.network("https://www.sample-videos.com/video123/mp4/360/big_buck_bunny_360p_30mb.mp4"),
-//       autoPlay: true,
-//     );
-//   }
-
-//   @override
-//   void dispose() {
-//     controller.dispose();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(),
-//       body: Container(
-//         height: 500,
-//         child: IjkPlayer(
-//           mediaController: controller,
-//           controllerWidgetBuilder: (ctl) {
-//             return DefaultIJKControllerWidget(
-//               controller: ctl,
-//               fullscreenControllerWidgetBuilder: _buildFullScrrenCtl,
-//             );
-//           },
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildFullScrrenCtl(IjkMediaController controller) {
-//     return DefaultIJKControllerWidget(
-//       controller: controller,
-//       doubleTapPlay: true,
-//       currentFullScreenState: true,
-//     );
-//   }
 // }

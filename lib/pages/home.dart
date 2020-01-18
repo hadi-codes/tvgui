@@ -2,6 +2,7 @@ import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ijkplayer/flutter_ijkplayer.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tvgui/channelspls/channel.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
@@ -33,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage>
   Orientation get orientation => MediaQuery.of(context).orientation;
   IjkMediaController mediaController = IjkMediaController();
   int _currentIndex = 1;
-
+  bool playInBackground ;
   List _categories = [
     // "Popular",
     "News",
@@ -59,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
-
+    getSettings();
     topWidget = pic();
 
     var option1 = IjkOption(IjkOptionCategory.format, "fflags", "fastseek");
@@ -96,13 +97,13 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     print(state);
-    if (state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.paused && playInBackground==false) {
       await mediaController.pause();
     } else if (state == AppLifecycleState.resumed) {
       mediaController.play();
     }
+    print(playInBackground);
   }
-
   // bool myInterceptor(bool stopDefaultButtonEvent) {
 
   //   print("BACK BUTTON!"); // Do some stuff.
@@ -171,35 +172,19 @@ class _MyHomePageState extends State<MyHomePage>
             ),
           ))
         ]),
-
-
-        // bottomNavigationBar: BottomNavigationBar(
-
-        //   onTap: (index) {},
-        //               elevation: 100.0,
-        //               currentIndex: 1,
-        //               backgroundColor: PrimaryColor,
-        //               unselectedItemColor: Colors.white,
-        //               selectedItemColor: Colors.yellow,
-        //               items: [
-        //                 BottomNavigationBarItem(
-        //                     icon: new Icon(Icons.search), title: new Text('Search')),
-        //                 BottomNavigationBarItem(
-        //                     icon: new Icon(Icons.tv), title: new Text('Channles')),
-        //                 BottomNavigationBarItem(
-        //                   icon: new Icon(Icons.settings),
-        //                   title: new Text(
-        //                     "Settings",
-        //                   ),
-        //                 )
-        //               ],
-        //             )
       ),
     );
   }
 
   Widget pic() {
     return Container(height: 200, child: Image.asset('assets/img/logo.png'));
+  }
+
+  getSettings() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    setState(() {
+      playInBackground = (sharedPrefs.getBool('playInBackground') ?? false);
+    });
   }
 
   Widget BuildVideoPlayer() {

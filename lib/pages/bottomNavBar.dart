@@ -1,6 +1,8 @@
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:tvgui/pages/searchPage.dart';
+import 'package:tvgui/pages/test.dart';
 
 import '../model/theme.dart';
 import '../model/theme.dart';
@@ -16,18 +18,18 @@ class BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
-  int _currentIndex = 0;
-  PageController _pageController;
-
+  int _currentIndex = 1;
+  PageController pageController;
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+
+    pageController = PageController(initialPage: 1);
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
+    pageController.dispose();
     super.dispose();
   }
 
@@ -36,13 +38,13 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return Scaffold(
       body: SizedBox.expand(
         child: PageView(
-          controller: _pageController,
+          controller: pageController,
           onPageChanged: (index) {
             setState(() => _currentIndex = index);
           },
           children: <Widget>[
             Container(
-              child: MyHomePage(),
+              child: SearchPage(),
             ),
             Container(
               child: MyHomePage(),
@@ -60,8 +62,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         selectedIndex: _currentIndex,
         onItemSelected: (index) {
           setState(() => _currentIndex = index);
-          _pageController.animateToPage(index,
-              curve: Curves.ease, duration: Duration(milliseconds: 300));
+          pageController.jumpToPage(index);
         },
         items: <BottomNavyBarItem>[
           BottomNavyBarItem(
