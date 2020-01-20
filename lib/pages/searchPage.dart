@@ -5,6 +5,7 @@ import 'package:tvgui/channelspls/channel.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tvgui/model/theme.dart';
 import 'package:tvgui/pages/bottomNavBar.dart';
+import 'package:tvgui/pages/videoPlayer.dart';
 
 class SearchPage extends StatefulWidget {
   SearchPage({
@@ -82,7 +83,15 @@ class _SearchPageState extends State<SearchPage> {
       itemCount: channels.length,
       itemBuilder: (BuildContext context, int index) {
         return ListTile(
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => VideoPlayer(
+                        url: channels[index].urls,
+                      )),
+            );
+          },
           leading: CachedNetworkImage(
             imageUrl: channels[index].logo,
             imageBuilder: (context, imageProvider) => Container(
@@ -110,14 +119,12 @@ class _SearchPageState extends State<SearchPage> {
           style: TextStyle(color: Colors.white),
           controller: _filter,
           decoration: new InputDecoration(
-         
-            prefixIcon: new Icon(Icons.search,color: Colors.white),
+            prefixIcon: new Icon(Icons.search, color: Colors.white),
             hintText: 'Search...',
             hintStyle: TextStyle(color: AppThemeData.AppYellow),
             enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: AppThemeData.AppYellow),
             ),
-            
           ),
         );
       } else {

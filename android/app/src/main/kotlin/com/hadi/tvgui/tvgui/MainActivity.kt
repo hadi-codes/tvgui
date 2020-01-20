@@ -1,4 +1,4 @@
-package com.hadi.tvgui.tvgui
+package com.hadi.tvgui
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity
