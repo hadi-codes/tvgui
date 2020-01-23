@@ -3,12 +3,10 @@ import 'package:tvgui/model/theme.dart';
 import 'package:tvgui/model/fetch_channels.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:tvgui/pages/home.dart';
-
 import 'bottomNavBar.dart';
 import 'home.dart';
 
 class WelcomFetch extends StatelessWidget {
-  
   const WelcomFetch({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -20,7 +18,6 @@ class WelcomFetch extends StatelessWidget {
           child: FutureBuilder(
             future: fetchServer(),
             builder: (BuildContext context, AsyncSnapshot snapshot) {
-            
               if (snapshot.data == null) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -36,11 +33,10 @@ class WelcomFetch extends StatelessWidget {
                   ],
                 );
               } else
-              
-              return BottomNavBar(
-                //title: 'Home',
-              //  cache: snapshot.data,
-              );
+                return BottomNavBar(
+                    //title: 'Home',
+                    //  cache: snapshot.data,
+                    );
             },
           ),
         ),

@@ -60,6 +60,23 @@ class _SettingsPageState extends State<SettingsPage> {
               color: AppThemeData.AppYellow,
             ),
           ),
+          SizedBox(height: 350,),
+          RaisedButton(
+            color: AppThemeData.AppYellow,
+            onPressed: () {},
+            child: const Text(
+              'Rate The App',
+              style: TextStyle(fontSize: 14, color: AppThemeData.PrimaryColor),
+            ),
+          ),
+          RaisedButton(
+            color: AppThemeData.AppYellow,
+            onPressed: () {},
+            child: const Text(
+              'Contact Us',
+              style: TextStyle(fontSize: 14, color: AppThemeData.PrimaryColor),
+            ),
+          )
         ],
       ),
     );
@@ -80,7 +97,3 @@ save(String key, dynamic value) async {
     sharedPrefs.setStringList(key, value);
   }
 }
-
-
-   
- 

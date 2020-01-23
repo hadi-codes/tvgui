@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 
-part 'channel.g.dart';
+// part 'channel.g.dart';
 
 @HiveType(typeId: 0)
 class Channel {
@@ -13,7 +13,7 @@ class Channel {
   @HiveField(3)
   final String countryCode;
   @HiveField(4)
-  final String urls;
+  final List<Url> urls;
 
   Channel({
     this.title,
@@ -24,8 +24,8 @@ class Channel {
   });
 }
 
-// class Url {
-//   final String url;
-//   final bool isOk;
-//   Url({this.url, this.isOk});
-// }
+class Url {
+  final String url;
+  final bool isOk;
+  Url({this.url, this.isOk});
+}

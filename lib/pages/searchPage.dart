@@ -88,7 +88,7 @@ class _SearchPageState extends State<SearchPage> {
               context,
               MaterialPageRoute(
                   builder: (context) => VideoPlayer(
-                        url: channels[index].urls,
+                      //  url: channels[index].urls,
                       )),
             );
           },

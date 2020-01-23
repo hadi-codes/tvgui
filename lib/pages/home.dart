@@ -34,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage>
   Orientation get orientation => MediaQuery.of(context).orientation;
   IjkMediaController mediaController = IjkMediaController();
   int _currentIndex = 1;
-  bool playInBackground ;
+  bool playInBackground;
   List _categories = [
     // "Popular",
     "News",
@@ -97,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     print(state);
-    if (state == AppLifecycleState.paused && playInBackground==false) {
+    if (state == AppLifecycleState.paused && playInBackground == false) {
       await mediaController.pause();
     } else if (state == AppLifecycleState.resumed) {
       mediaController.play();
@@ -234,8 +234,8 @@ class _MyHomePageState extends State<MyHomePage>
           onTap: () {
             setState(() {
               topWidget = BuildVideoPlayer();
-              mediaController.setNetworkDataSource(channels[index].urls,
-                  autoPlay: true);
+              // mediaController.setNetworkDataSource(channels[index].urls,
+              //     autoPlay: true);
             });
           },
           leading: CachedNetworkImage(
@@ -252,18 +252,18 @@ class _MyHomePageState extends State<MyHomePage>
             channels[index].title,
             style: TextStyle(color: Colors.white),
           ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(
-                  Icons.favorite,
-                  color: AppColorYellow,
-                ),
-                onPressed: () {},
-              ),
-            ],
-          ),
+          // trailing: Row(
+          //   mainAxisSize: MainAxisSize.min,
+          //   children: <Widget>[
+          //     IconButton(
+          //       icon: Icon(
+          //         Icons.favorite,
+          //         color: AppColorYellow,
+          //       ),
+          //       onPressed: () {},
+          //     ),
+          //   ],
+          // ),
         );
       },
     );

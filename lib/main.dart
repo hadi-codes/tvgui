@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tvgui/model/theme.dart';
 import 'package:tvgui/pages/bottomNavBar.dart';
+import 'package:tvgui/pages/maintenancePage.dart';
 import 'package:tvgui/pages/setting.dart';
+import 'package:tvgui/pages/updatePage.dart';
 import 'package:tvgui/pages/welcom_fetch.dart';
 
 import 'pages/welcom_fetch.dart';

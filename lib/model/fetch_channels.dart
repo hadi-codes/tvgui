@@ -1,13 +1,19 @@
 import 'package:http/http.dart' as http;
+import 'package:package_info/package_info.dart';
 import 'dart:convert';
 import 'package:tvgui/channelspls/channel.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
 Future fetchServer() async {
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
   final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
   Hive.init(appDocumentDir.path);
-  Hive.registerAdapter(ChannelAdapter());
+  //Hive.registerAdapter(ChannelAdapter());
+  String version = packageInfo.version;
+  String buildNumber = packageInfo.buildNumber;
+  print(version); 
+  print(buildNumber);
   final channelsBox = await Hive.openBox('channels');
   final configBox = await Hive.openBox('configBox');
   var channelsVer = await http.get('https://api.hadi.wtf/config');
