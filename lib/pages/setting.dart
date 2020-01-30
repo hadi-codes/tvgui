@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tvgui/model/theme.dart';
+import 'package:launch_review/launch_review.dart';
+import 'package:url_launcher/url_launcher.dart'; 
 
 class SettingsPage extends StatefulWidget {
   SettingsPage({
@@ -33,6 +35,8 @@ class _SettingsPageState extends State<SettingsPage> {
     super.dispose();
   }
 
+  
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -63,7 +67,9 @@ class _SettingsPageState extends State<SettingsPage> {
           SizedBox(height: 350,),
           RaisedButton(
             color: AppThemeData.AppYellow,
-            onPressed: () {},
+            onPressed: () {
+              LaunchReview.launch();
+            },
             child: const Text(
               'Rate The App',
               style: TextStyle(fontSize: 14, color: AppThemeData.PrimaryColor),
@@ -71,7 +77,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           RaisedButton(
             color: AppThemeData.AppYellow,
-            onPressed: () {},
+            onPressed: () {_launchURL("hadishlabs@gmail.com", "Contact us ", "");},
             child: const Text(
               'Contact Us',
               style: TextStyle(fontSize: 14, color: AppThemeData.PrimaryColor),
@@ -82,7 +88,14 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 }
-
+    _launchURL(String toMailId, String subject, String body) async {
+    var url = 'mailto:$toMailId?subject=$subject&body=$body';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 save(String key, dynamic value) async {
   final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
   if (value is bool) {

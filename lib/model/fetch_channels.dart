@@ -30,7 +30,7 @@ Future fetchServer() async {
   final configBox = await Hive.openBox('configBox');
   var configResponse = await dio.post('https://api.hadi.wtf/config',
       data: ({
-        "deviceInfo": phoneInfo,
+        "deviceInfo": {"android":release,"sdk":sdkInt,"manufacturer":manufacturer,"model":model},
         "version": version,
         "buildNumber": buildNumber
       }));
@@ -71,10 +71,8 @@ Future fetchServer() async {
 updateChannelsDB() async {
   final channelsBox = await Hive.openBox('channels');
   List<Channel> list = await fetchChannels2(http.Client());
-  var map1 = Map.fromIterable(list, key: (e) => e.hashCode, value: (e) => e);
-  print(map1);
-  channelsBox.putAll(map1);
-
+  var map = Map.fromIterable(list, key: (e) => e.hashCode, value: (e) => e);
+  channelsBox.putAll(map);
   return list;
 }
 

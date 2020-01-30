@@ -39,7 +39,7 @@ class WelcomFetch extends StatelessWidget {
                   ],
                 );
               } else if (snapshot.data == "maintenance") {
-                return Maintenance(msg:"maintenance mode ... we will back soon . Email : hadishlabs@gmail.com" ,);
+                return Maintenance(msg:"maintenance mode ... we will back soon ." ,);
               } else if (snapshot.data == "update") {
                return UpdatePage(msg: "Please Upadate The App ..",);
               } else
