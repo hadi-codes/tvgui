@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
 import 'package:tvgui/model/theme.dart';
-import 'package:tvgui/pages/bottomNavBar.dart';
-import 'package:tvgui/pages/maintenancePage.dart';
-import 'package:tvgui/pages/setting.dart';
-import 'package:tvgui/pages/updatePage.dart';
-import 'package:tvgui/pages/welcom_fetch.dart';
+import 'package:tvgui/channelspls/channel.dart';
 
 import 'pages/welcom_fetch.dart';
 
 void main() {
-
   WidgetsFlutterBinding.ensureInitialized();
-
+  Hive.registerAdapter(UrlAdapter());
+  Hive.registerAdapter(ChannelAdapter());
   final Color color = const Color(0xff20232C);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       systemNavigationBarColor: color, // navigation bar color
@@ -20,7 +17,6 @@ void main() {
       statusBarBrightness: Brightness.light,
       statusBarIconBrightness: Brightness.light));
   runApp(MyApp());
-
 }
 
 class MyApp extends StatelessWidget {

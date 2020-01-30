@@ -1,6 +1,7 @@
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:tvgui/channelspls/channel.dart';
 import 'package:tvgui/pages/searchPage.dart';
 import 'package:tvgui/pages/test.dart';
 
@@ -11,8 +12,9 @@ import 'home.dart';
 import 'setting.dart';
 
 class BottomNavBar extends StatefulWidget {
-  BottomNavBar({Key key}) : super(key: key);
-
+  BottomNavBar({Key key,this.cache}) : super(key: key);
+  final List<Channel> cache;
+  
   @override
   _BottomNavBarState createState() => _BottomNavBarState();
 }
@@ -47,7 +49,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
               child: SearchPage(),
             ),
             Container(
-              child: MyHomePage(),
+              child: MyHomePage(cache: widget.cache,),
             ),
             Container(
               child: SettingsPage(),

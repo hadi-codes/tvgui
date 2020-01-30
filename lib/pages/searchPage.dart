@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tvgui/channelspls/channel.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tvgui/model/theme.dart';
 import 'package:tvgui/pages/bottomNavBar.dart';
 import 'package:tvgui/pages/videoPlayer.dart';
+
+import 'package:http/http.dart' as http;
 
 class SearchPage extends StatefulWidget {
   SearchPage({
@@ -88,7 +93,7 @@ class _SearchPageState extends State<SearchPage> {
               context,
               MaterialPageRoute(
                   builder: (context) => VideoPlayer(
-                      //  url: channels[index].urls,
+                        url: channels[index].urls[0].url,
                       )),
             );
           },
@@ -97,10 +102,16 @@ class _SearchPageState extends State<SearchPage> {
             imageBuilder: (context, imageProvider) => Container(
                 child: CircleAvatar(
               backgroundImage: imageProvider,
-              backgroundColor: Colors.white,
+              backgroundColor: AppThemeData.PrimaryColor,
             )),
             placeholder: (context, url) => CircularProgressIndicator(),
-            errorWidget: (context, url, error) => Icon(Icons.broken_image),
+            errorWidget: (context, url, error) => CircleAvatar(
+              child: Icon(
+                Icons.broken_image,
+                color: AppThemeData.AppGray,
+              ),
+              backgroundColor: Colors.white,
+            ),
           ),
           title: Text(
             channels[index].title,
@@ -138,26 +149,27 @@ class _SearchPageState extends State<SearchPage> {
 
   void _getChannels() async {
     print("getting Channels");
-    final response = await dio
-        .post('https://api.hadi.wtf/search', data: {"name": _searchText});
+    // final response = await dio
+    //     .post('https://api.hadi.wtf/search', data: {"name": _searchText});
     List<Channel> tempList = new List<Channel>();
-    print(response.data.length);
-    for (var i = 0; i < response.data.length; i++) {
-      var data = response.data[i];
 
-      Channel channel = Channel(
-        countryCode: data["countryCode"],
-        logo: data["logo"],
-        categories: data['categories'],
-        title: data["title"],
-        urls: data["urls"][0]["url"],
-      );
-      tempList.add(channel);
-    }
-
+    tempList = await fetchChannels(http.Client(), _searchText);
     setState(() {
       channels = tempList;
       filteredChannels = channels;
     });
   }
+}
+
+Future<List<Channel>> fetchChannels(
+    http.Client client, String searchText) async {
+  final response = await client
+      .post('https://api.hadi.wtf/search', body: {"name": searchText});
+
+  return compute(parseChannels, response.body);
+}
+
+List<Channel> parseChannels(String responseBody) {
+  final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+  return parsed.map<Channel>((json) => Channel.fromJson(json)).toList();
 }

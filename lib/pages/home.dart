@@ -1,13 +1,14 @@
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
+import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ijkplayer/flutter_ijkplayer.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tvgui/channelspls/channel.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
-import 'package:back_button_interceptor/back_button_interceptor.dart';
 // import 'package:auto_orientation/auto_orientation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:tvgui/model/theme.dart';
 
 import 'bottomNavBar.dart';
 import 'bottomNavBar.dart';
@@ -17,11 +18,11 @@ class MyHomePage extends StatefulWidget {
   MyHomePage({
     Key key,
     this.title,
-    //  this.cache,
+    this.cache,
   }) : super(key: key);
 
   final String title;
-  //final List<Channel> cache;
+  final List<Channel> cache;
 
   String url;
   @override
@@ -49,6 +50,7 @@ class _MyHomePageState extends State<MyHomePage>
     "Series"
   ];
   Widget topWidget;
+  Widget ServersWidget;
   final List<Tab> tabs = <Tab>[];
 
   TabController _tabController;
@@ -62,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage>
     WidgetsBinding.instance.addObserver(this);
     getSettings();
     topWidget = pic();
-
+    ServersWidget = Container();
     var option1 = IjkOption(IjkOptionCategory.format, "fflags", "fastseek");
 
     mediaController.setIjkPlayerOptions(
@@ -104,11 +106,6 @@ class _MyHomePageState extends State<MyHomePage>
     }
     print(playInBackground);
   }
-  // bool myInterceptor(bool stopDefaultButtonEvent) {
-
-  //   print("BACK BUTTON!"); // Do some stuff.
-  //   return true;
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -141,6 +138,29 @@ class _MyHomePageState extends State<MyHomePage>
             aspectRatio: 1280 / 720,
             child: topWidget,
           ),
+          new Container(
+            //padding: const EdgeInsets.all(32.0),
+
+            //color: const Color(0xffDC1C17),
+
+            decoration: new BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: new BorderRadius.only(
+                topLeft: const Radius.circular(40.0),
+                topRight: const Radius.circular(40.0),
+                bottomLeft: const Radius.circular(40.0),
+                bottomRight: const Radius.circular(40.0),
+              ),
+            ),
+            child: new Container(
+                decoration: new BoxDecoration(
+                    color: AppThemeData.AppYellow,
+                    borderRadius: new BorderRadius.only(
+                      topLeft: const Radius.circular(40.0),
+                      topRight: const Radius.circular(40.0),
+                    )),
+                child: ServersWidget),
+          ),
           Flexible(
 
               // this will host our Tab Views
@@ -167,7 +187,9 @@ class _MyHomePageState extends State<MyHomePage>
             body: new TabBarView(
               controller: _tabController,
               children: tabs.map((Tab tab) {
-                return new Container(child: _buildBody(tab.text));
+                return new Container(
+                  child: _buildBody(tab.text),
+                );
               }).toList(),
             ),
           ))
@@ -178,6 +200,17 @@ class _MyHomePageState extends State<MyHomePage>
 
   Widget pic() {
     return Container(height: 200, child: Image.asset('assets/img/logo.png'));
+  }
+
+  Widget welecomMsg() {
+    return Container(
+        color: AppThemeData.AppGray,
+        height: 50,
+        width: 500,
+        child: Center(
+          child: Text("Hi This Is Wahlnut...",
+              style: TextStyle(color: AppThemeData.AppYellow, fontSize: 16)),
+        ));
   }
 
   getSettings() async {
@@ -211,61 +244,161 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
+  serversWidgets(List<Url> urls) {
+    List<Widget> list = [];
+
+    for (int i = 0; i < urls.length; i++) {
+      list.add(SizedBox(
+        width: 5,
+      ));
+      list.add(SizedBox(
+        width: 90,
+        child: RaisedButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: new BorderRadius.circular(18.0),
+          ),
+          child: Text(
+            'sever ${i + 1}',
+          ),
+          color: (urls[i].isOk) ? Colors.lightBlue : AppThemeData.Red,
+          onPressed: () {
+            setState(() {
+              topWidget = BuildVideoPlayer();
+              mediaController.setNetworkDataSource(urls[i].url, autoPlay: true);
+            });
+          },
+        ),
+      ));
+      list.add(SizedBox(
+        width: 5,
+      ));
+    }
+    return list;
+  }
+
   Widget _buildBody(String category) {
-    final channelsBox = Hive.box('channels');
+    List<Channel> theCategory = [];
 
-    List<Channel> channels = [];
-
-    channelsBox.get(Channel);
-
-    for (var i = 0; i < channelsBox.length; i++) {
-      final channel = channelsBox.get(i) as Channel;
-      if (category.toLowerCase() ==
-          channel.categories.toString().toLowerCase()) {
-        // print(channel.categories);
-        channels.add(channel);
+    for (var i in widget.cache) {
+      if (category.toLowerCase() == i.categories.toString().toLowerCase()) {
+        // print(i.categories);
+        theCategory.add(i);
       }
     }
 
+
+    _serverWidgetBody(Channel channel) {
+      return ExpansionTile(
+        title: Text(channel.title),
+        trailing: Flags.getMiniFlag(channel.countryCode.toUpperCase(), 20, 20),
+        children: <Widget>[
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: serversWidgets(channel.urls),
+            ),
+          )
+        ],
+      );
+    }
+
     return ListView.builder(
-      itemCount: channels.length,
+      itemCount: theCategory.length,
       itemBuilder: (BuildContext context, int index) {
         return ListTile(
           onTap: () {
             setState(() {
+              print(theCategory[index].urls[0].url);
+              print(theCategory[index].urls[0].isOk);
+              ServersWidget = _serverWidgetBody(theCategory[index]);
               topWidget = BuildVideoPlayer();
-              // mediaController.setNetworkDataSource(channels[index].urls,
-              //     autoPlay: true);
+              mediaController.setNetworkDataSource(
+                  theCategory[index].urls[0].url,
+                  autoPlay: true);
             });
           },
           leading: CachedNetworkImage(
-            imageUrl: channels[index].logo,
+            imageUrl: theCategory[index].logo,
             imageBuilder: (context, imageProvider) => Container(
                 child: CircleAvatar(
               backgroundImage: imageProvider,
-              backgroundColor: PrimaryColor,
+              backgroundColor: AppThemeData.PrimaryColor,
             )),
             placeholder: (context, url) => CircularProgressIndicator(),
-            errorWidget: (context, url, error) => Icon(Icons.broken_image),
+            errorWidget: (context, url, error) => CircleAvatar(
+              child: Icon(
+                Icons.broken_image,
+                color: AppThemeData.AppGray,
+              ),
+              backgroundColor: Colors.white,
+            ),
           ),
           title: Text(
-            channels[index].title,
+            theCategory[index].title,
             style: TextStyle(color: Colors.white),
           ),
-          // trailing: Row(
-          //   mainAxisSize: MainAxisSize.min,
-          //   children: <Widget>[
-          //     IconButton(
-          //       icon: Icon(
-          //         Icons.favorite,
-          //         color: AppColorYellow,
-          //       ),
-          //       onPressed: () {},
-          //     ),
-          //   ],
-          // ),
         );
       },
     );
   }
+
+  // Widget _buildBody(String category) {
+  //   final channelsBox = Hive.box('channels');
+
+  //   List<Channel> channels = [];
+
+  //   channelsBox.get(Channel);
+
+  //   for (var i = 0; i < channelsBox.length; i++) {
+  //     final channel = channelsBox.get(i) as Channel;
+  //     if (category.toLowerCase() ==
+  //         channel.categories.toString().toLowerCase()) {
+  //       // print(channel.categories);
+  //       channels.add(channel);
+  //     }
+  //   }
+
+  //   return ListView.builder(
+  //     itemCount: channels.length,
+  //     itemBuilder: (BuildContext context, int index) {
+  //       return ListTile(
+  //         onTap: () {
+  //           setState(() {
+  //             topWidget = BuildVideoPlayer();
+  //             // mediaController.setNetworkDataSource(channels[index].urls,
+  //             //     autoPlay: true);
+  //           });
+  //         },
+  //         leading: CachedNetworkImage(
+  //           imageUrl: channels[index].logo,
+  //           imageBuilder: (context, imageProvider) => Container(
+  //               child: CircleAvatar(
+  //             backgroundImage: imageProvider,
+  //             backgroundColor: PrimaryColor,
+  //           )),
+  //           placeholder: (context, url) => CircularProgressIndicator(),
+  //           errorWidget: (context, url, error) => Icon(Icons.broken_image),
+  //         ),
+  //         title: Text(
+  //           channels[index].title,
+  //           style: TextStyle(color: Colors.white),
+  //         ),
+  //         // trailing: Row(
+  //         //   mainAxisSize: MainAxisSize.min,
+  //         //   children: <Widget>[
+  //         //     IconButton(
+  //         //       icon: Icon(
+  //         //         Icons.favorite,
+  //         //         color: AppColorYellow,
+  //         //       ),
+  //         //       onPressed: () {},
+  //         //     ),
+  //         //   ],
+  //         // ),
+  //       );
+  //     },
+  //   );
+  // }
 }

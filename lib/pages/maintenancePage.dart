@@ -14,7 +14,7 @@ class Maintenance extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Image.asset("assets/img/maintenance.png"),
-            Text(msg,style: TextStyle(color: AppThemeData.AppYellow,fontSize: 18),)
+            Text(msg,style: TextStyle(color: AppThemeData.AppYellow,fontSize: 18,),textAlign: TextAlign.center,)
           ],
         )));
   }
