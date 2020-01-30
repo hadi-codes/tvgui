@@ -1,18 +1,12 @@
-import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ijkplayer/flutter_ijkplayer.dart';
-import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tvgui/channelspls/channel.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 // import 'package:auto_orientation/auto_orientation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:tvgui/model/theme.dart';
-
-import 'bottomNavBar.dart';
-import 'bottomNavBar.dart';
-import 'setting.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({
@@ -34,7 +28,6 @@ class _MyHomePageState extends State<MyHomePage>
   PageController _pageController;
   Orientation get orientation => MediaQuery.of(context).orientation;
   IjkMediaController mediaController = IjkMediaController();
-  int _currentIndex = 1;
   bool playInBackground;
   List _categories = [
     // "Popular",
@@ -50,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage>
     "Series"
   ];
   Widget topWidget;
-  Widget ServersWidget;
+  Widget serversWidget;
   final List<Tab> tabs = <Tab>[];
 
   TabController _tabController;
@@ -64,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage>
     WidgetsBinding.instance.addObserver(this);
     getSettings();
     topWidget = pic();
-    ServersWidget = Container();
+    serversWidget = Container();
     var option1 = IjkOption(IjkOptionCategory.format, "fflags", "fastseek");
 
     mediaController.setIjkPlayerOptions(
@@ -85,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   @override
   void dispose() {
-    BuildVideoPlayer();
+    buildVideoPlayer();
     // BackButtonInterceptor.remove(myInterceptor);
     mediaController?.dispose();
 
@@ -159,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage>
                       topLeft: const Radius.circular(40.0),
                       topRight: const Radius.circular(40.0),
                     )),
-                child: ServersWidget),
+                child: serversWidget),
           ),
           Flexible(
 
@@ -220,7 +213,7 @@ class _MyHomePageState extends State<MyHomePage>
     });
   }
 
-  Widget BuildVideoPlayer() {
+  Widget buildVideoPlayer() {
     return Container(
       height: 200,
       child: IjkPlayer(
@@ -263,7 +256,7 @@ class _MyHomePageState extends State<MyHomePage>
           color: (urls[i].isOk) ? Colors.lightBlue : AppThemeData.Red,
           onPressed: () {
             setState(() {
-              topWidget = BuildVideoPlayer();
+              topWidget = buildVideoPlayer();
               mediaController.setNetworkDataSource(urls[i].url, autoPlay: true);
             });
           },
@@ -312,8 +305,8 @@ class _MyHomePageState extends State<MyHomePage>
             setState(() {
               print(theCategory[index].urls[0].url);
               print(theCategory[index].urls[0].isOk);
-              ServersWidget = _serverWidgetBody(theCategory[index]);
-              topWidget = BuildVideoPlayer();
+              serversWidget = _serverWidgetBody(theCategory[index]);
+              topWidget = buildVideoPlayer();
               mediaController.setNetworkDataSource(
                   theCategory[index].urls[0].url,
                   autoPlay: true);

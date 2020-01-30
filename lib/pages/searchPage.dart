@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:tvgui/channelspls/channel.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tvgui/model/theme.dart';
-import 'package:tvgui/pages/bottomNavBar.dart';
 import 'package:tvgui/pages/videoPlayer.dart';
 
 import 'package:http/http.dart' as http;

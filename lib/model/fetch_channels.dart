@@ -20,9 +20,7 @@ Future fetchServer() async {
   var sdkInt = androidInfo.version.sdkInt;
   var manufacturer = androidInfo.manufacturer;
   var model = androidInfo.model;
-  String phoneInfo =
-      ('Android $release (SDK $sdkInt), ManuF $manufacturer Model $model');
-
+ 
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
   String version = packageInfo.version;

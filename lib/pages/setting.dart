@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tvgui/model/theme.dart';
 import 'package:launch_review/launch_review.dart';
-import 'package:url_launcher/url_launcher.dart'; 
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
   SettingsPage({
@@ -35,8 +35,6 @@ class _SettingsPageState extends State<SettingsPage> {
     super.dispose();
   }
 
-  
-
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -44,43 +42,53 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       body: Column(
         children: <Widget>[
-          new SwitchListTile(
-            activeColor: AppThemeData.AppYellow,
-            inactiveThumbColor: AppThemeData.AppGray,
-            inactiveTrackColor: Colors.grey,
-            title: const Text(
-              'Play in Background',
-              style: TextStyle(color: Colors.white),
+          Flexible(
+            child: SwitchListTile(
+              activeColor: AppThemeData.AppYellow,
+              inactiveThumbColor: AppThemeData.AppGray,
+              inactiveTrackColor: Colors.grey,
+              title: const Text(
+                'Play in Background',
+                style: TextStyle(color: Colors.white),
+              ),
+              value: widget.platInBackground,
+              onChanged: (bool value) {
+                setState(() {
+                  widget.platInBackground = value;
+                });
+                save('playInBackground', value);
+              },
+              secondary: const Icon(
+                Icons.play_circle_filled,
+                color: AppThemeData.AppYellow,
+              ),
             ),
-            value: widget.platInBackground,
-            onChanged: (bool value) {
-              setState(() {
-                widget.platInBackground = value;
-              });
-              save('playInBackground', value);
-            },
-            secondary: const Icon(
-              Icons.play_circle_filled,
+          ),
+          //   SizedBox(height: 350,),
+          Flexible(
+            child: RaisedButton(
               color: AppThemeData.AppYellow,
+              onPressed: () {
+                LaunchReview.launch();
+              },
+              child: const Text(
+                'Rate The App',
+                style:
+                    TextStyle(fontSize: 14, color: AppThemeData.PrimaryColor),
+              ),
             ),
           ),
-          SizedBox(height: 350,),
-          RaisedButton(
-            color: AppThemeData.AppYellow,
-            onPressed: () {
-              LaunchReview.launch();
-            },
-            child: const Text(
-              'Rate The App',
-              style: TextStyle(fontSize: 14, color: AppThemeData.PrimaryColor),
-            ),
-          ),
-          RaisedButton(
-            color: AppThemeData.AppYellow,
-            onPressed: () {_launchURL("hadishlabs@gmail.com", "Contact us ", "");},
-            child: const Text(
-              'Contact Us',
-              style: TextStyle(fontSize: 14, color: AppThemeData.PrimaryColor),
+          Flexible(
+            child: RaisedButton(
+              color: AppThemeData.AppYellow,
+              onPressed: () {
+                _launchURL("hadishlabs@gmail.com", "Contact us ", "");
+              },
+              child: const Text(
+                'Contact Us',
+                style:
+                    TextStyle(fontSize: 14, color: AppThemeData.PrimaryColor),
+              ),
             ),
           )
         ],
@@ -88,14 +96,16 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 }
-    _launchURL(String toMailId, String subject, String body) async {
-    var url = 'mailto:$toMailId?subject=$subject&body=$body';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
+
+_launchURL(String toMailId, String subject, String body) async {
+  var url = 'mailto:$toMailId?subject=$subject&body=$body';
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
   }
+}
+
 save(String key, dynamic value) async {
   final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
   if (value is bool) {

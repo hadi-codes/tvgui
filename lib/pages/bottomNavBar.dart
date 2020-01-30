@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tvgui/channelspls/channel.dart';
 import 'package:tvgui/pages/searchPage.dart';
-import 'package:tvgui/pages/test.dart';
 
 import '../model/theme.dart';
-import '../model/theme.dart';
-import '../model/theme.dart';
+
 import 'home.dart';
 import 'setting.dart';
 

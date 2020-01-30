@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:tvgui/model/theme.dart';
 import 'package:tvgui/model/fetch_channels.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:tvgui/pages/home.dart';
 import 'package:tvgui/pages/maintenancePage.dart';
 import 'package:tvgui/pages/updatePage.dart';
 import 'bottomNavBar.dart';
-import 'home.dart';
 
-import 'package:http/http.dart' as http;
 
 class WelcomFetch extends StatelessWidget {
   const WelcomFetch({Key key}) : super(key: key);
