@@ -64,7 +64,9 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-          //   SizedBox(height: 350,),
+          SizedBox(
+            height: 250,
+          ),
           Flexible(
             child: RaisedButton(
               color: AppThemeData.AppYellow,

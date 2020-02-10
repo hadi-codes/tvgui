@@ -7,6 +7,7 @@ import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 // import 'package:auto_orientation/auto_orientation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:tvgui/model/theme.dart';
+import 'package:wakelock/wakelock.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({
@@ -56,6 +57,8 @@ class _MyHomePageState extends State<MyHomePage>
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     getSettings();
+    Wakelock.enable();
+
     topWidget = pic();
     serversWidget = Container();
     var option1 = IjkOption(IjkOptionCategory.format, "fflags", "fastseek");

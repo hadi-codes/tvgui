@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:tvgui/model/theme.dart';
 import 'package:tvgui/model/fetch_channels.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:tvgui/pages/errorPage.dart';
 import 'package:tvgui/pages/maintenancePage.dart';
 import 'package:tvgui/pages/updatePage.dart';
 import 'bottomNavBar.dart';
@@ -39,7 +41,12 @@ class WelcomFetch extends StatelessWidget {
                 return Maintenance(msg:"maintenance mode ... we will back soon ." ,);
               } else if (snapshot.data == "update") {
                return UpdatePage(msg: "Please Upadate The App ..",);
-              } else
+               
+              } 
+              else if (snapshot.data.runtimeType==  DioError ) {
+                return ErrorPage(errorMsg: snapshot.data.message,);
+              }
+              else
                 return BottomNavBar(
                   //title: 'Home',
                   cache: snapshot.data,

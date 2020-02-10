@@ -20,18 +20,38 @@ Future fetchServer() async {
   var sdkInt = androidInfo.version.sdkInt;
   var manufacturer = androidInfo.manufacturer;
   var model = androidInfo.model;
- 
+
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
   String version = packageInfo.version;
   String buildNumber = packageInfo.buildNumber;
   final configBox = await Hive.openBox('configBox');
-  var configResponse = await dio.post('https://api.hadi.wtf/config',
-      data: ({
-        "deviceInfo": {"android":release,"sdk":sdkInt,"manufacturer":manufacturer,"model":model},
-        "version": version,
-        "buildNumber": buildNumber
-      }));
+
+  var configResponse;
+  try {
+    configResponse = await dio.post('https://api.hadi.wtf/config',
+        data: ({
+          "deviceInfo": {
+            "android": release,
+            "sdk": sdkInt,
+            "manufacturer": manufacturer,
+            "model": model
+          },
+          "version": version,
+          "buildNumber": buildNumber
+        }));
+  } on DioError catch (e) {
+    if (e.response!=null) {
+      // print(e.response.data);
+      // // print(e.response.headers);
+      // print(e.response.request);
+    } else {
+      // Something happened in setting up or sending the request that triggered an Error
+      // print(e.request);
+      // print(e.message);
+    }
+    return (e);
+  }
   Config config = configParser(configResponse);
 // check if the app need to update
   if (config.fourceUpdate == true) {
