@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "592116582361",
+    "firebase_url": "https://tvgui-71734.firebaseio.com",
+    "project_id": "tvgui-71734",
+    "storage_bucket": "tvgui-71734.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:592116582361:android:d65339fe1bb676bd80bbc8",
+        "android_client_info": {
+          "package_name": "com.hadi.tvgui"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "592116582361-1hun5nlmbhfu06uvjado60q7t39k2fl4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAF0l2GpeDkWmocOEXWpT-rF_YN8_SK8E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "592116582361-1hun5nlmbhfu06uvjado60q7t39k2fl4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

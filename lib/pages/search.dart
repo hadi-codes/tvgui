@@ -4,10 +4,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:tvgui/channelspls/channel.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tvgui/bloc/Page/page_bloc.dart';
+import 'package:tvgui/bloc/video/video_bloc.dart';
+import 'package:tvgui/db/db.dart';
+import 'package:tvgui/model/channel/channel.dart';
 import 'package:tvgui/model/theme.dart';
-import 'package:tvgui/pages/videoPlayer.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -21,16 +23,13 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  // final formKey = new GlobalKey<FormState>();
-  // final key = new GlobalKey<ScaffoldState>();
   final TextEditingController _filter = new TextEditingController();
-  final dio = new Dio(); // for http requests
+  final dio = new Dio();
   String _searchText = "";
-  List<Channel> channels = new List<Channel>(); // names we get from API
-  List<Channel> filteredChannels =
-      new List<Channel>(); // names filtered by search text
+  List<Channel> channels = new List<Channel>();
+  List<Channel> filteredChannels = new List<Channel>();
   Icon _searchIcon = new Icon(Icons.search);
-  Widget _appBarTitle = new Text('Search');
+  Widget _appBarTitle = new Text('بحث');
   _SearchPageState() {
     _filter.addListener(() {
       if (_filter.text.isEmpty) {
@@ -65,7 +64,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildBar(BuildContext context) {
-    return new AppBar(
+    return AppBar(
       centerTitle: true,
       title: _appBarTitle,
       leading: new IconButton(
@@ -86,15 +85,32 @@ class _SearchPageState extends State<SearchPage> {
     return ListView.builder(
       itemCount: channels.length,
       itemBuilder: (BuildContext context, int index) {
+        bool isFav = Db.isInFavourite(channels[index]);
+
         return ListTile(
+          trailing:  IconButton(
+            icon: Icon(
+              Icons.favorite,
+              color: isFav ? AppThemeData.AppYellow : AppThemeData.AppGray,
+            ),
+            onPressed: () {
+              setState(() {
+                if (isFav == true) {
+                  isFav = false;
+                  Db.deleteFormFavourite(channels[index]);
+                } else {
+                  isFav = true;
+                  Db.putToFavourite(channels[index]);
+                }
+              });
+
+            },
+          ),
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => VideoPlayer(
-                        url: channels[index].urls[0].url,
-                      )),
-            );
+            BlocProvider.of<VideoBloc>(context)
+                .add(Click(channel: channels[index]));
+            BlocProvider.of<PageBloc>(context)
+                .add(ChangePage(page: 1, channel: channels[index]));
           },
           leading: CachedNetworkImage(
             imageUrl: channels[index].logo,
@@ -130,7 +146,7 @@ class _SearchPageState extends State<SearchPage> {
           controller: _filter,
           decoration: new InputDecoration(
             prefixIcon: new Icon(Icons.search, color: Colors.white),
-            hintText: 'Search...',
+            hintText: 'بحث...',
             hintStyle: TextStyle(color: AppThemeData.AppYellow),
             enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: AppThemeData.AppYellow),

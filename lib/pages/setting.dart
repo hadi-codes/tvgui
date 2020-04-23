@@ -1,32 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_beautiful_popup/main.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:line_awesome_icons/line_awesome_icons.dart';
+import 'package:loading_indicator/loading_indicator.dart';
+import 'package:share/share.dart';
+import 'package:social_media_buttons/social_media_button.dart';
+import 'package:tvgui/db/db.dart';
+import 'package:tvgui/model/notes.dart';
+import 'package:tvgui/model/settings.dart';
 import 'package:tvgui/model/theme.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_beautiful_popup/templates/OrangeRocket.dart';
 
 class SettingsPage extends StatefulWidget {
   SettingsPage({
     Key key,
   }) : super(key: key);
 
-  bool platInBackground = false;
-
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  Settings settings = Settings();
+
   @override
   void initState() {
     super.initState();
     restore();
   }
 
-  restore() async {
-    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+  restore() {
     setState(() {
-      widget.platInBackground =
-          (sharedPrefs.getBool('playInBackground') ?? false);
+      settings = Db.getSettings();
     });
   }
 
@@ -37,66 +45,338 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Settings'),
+        centerTitle: true,
+        title: Text('الإعدادات'),
       ),
-      body: Column(
-        children: <Widget>[
-          Flexible(
-            child: SwitchListTile(
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Divider(
+              color: AppThemeData.AppGray,
+              thickness: 2,
+              height: 2,
+            ),
+            SwitchListTile(
               activeColor: AppThemeData.AppYellow,
               inactiveThumbColor: AppThemeData.AppGray,
               inactiveTrackColor: Colors.grey,
-              title: const Text(
-                'Play in Background',
+              title: Text(
+                'تشغيل في الخلفية',
                 style: TextStyle(color: Colors.white),
               ),
-              value: widget.platInBackground,
+              value: settings.playBackGround,
               onChanged: (bool value) {
-                setState(() {
-                  widget.platInBackground = value;
-                });
-                save('playInBackground', value);
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: Text("الخاصية غير مفعلة حاليا"),
+                  ),
+                  duration: Duration(seconds: 2),
+                  backgroundColor: Colors.red,
+                ));
+                // setState(() {
+                //   settings.playBackGround = value;
+                // });
+                // Db.setSettings(settings);
               },
               secondary: const Icon(
                 Icons.play_circle_filled,
                 color: AppThemeData.AppYellow,
               ),
             ),
-          ),
-          SizedBox(
-            height: 250,
-          ),
-          Flexible(
-            child: RaisedButton(
-              color: AppThemeData.AppYellow,
-              onPressed: () {
+            Divider(
+              color: AppThemeData.AppGray,
+              thickness: 2,
+              height: 2,
+            ),
+            ListTile(
+              leading: Icon(
+                LineAwesomeIcons.sort,
+                color: AppThemeData.AppYellow,
+              ),
+              title: Text(
+                "فرز حسب ",
+                style: TextStyle(color: Colors.white),
+              ),
+              trailing: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  FlatButton(
+                    child: Text("الفئة"),
+                    color: settings.sortBy == SortBy.category
+                        ? AppThemeData.AppYellow
+                        : AppThemeData.AppGray,
+                    onPressed: () {
+                      setState(() {
+                        settings.sortBy = SortBy.category;
+                        Db.setSettings(settings);
+                      });
+                    },
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  FlatButton(
+                    child: Text("الدولة"),
+                    color: settings.sortBy == SortBy.country
+                        ? AppThemeData.AppYellow
+                        : AppThemeData.AppGray,
+                    onPressed: () {
+                      setState(() {
+                        settings.sortBy = SortBy.country;
+                        Db.setSettings(settings);
+                      });
+                    },
+                  )
+                ],
+              ),
+            ),
+            Divider(
+              color: AppThemeData.AppGray,
+              thickness: 2,
+              height: 2,
+            ),
+            ListTile(
+              leading: Icon(
+                LineAwesomeIcons.at,
+                color: AppThemeData.AppYellow,
+              ),
+              title: Text(
+                'تواصل معنا ',
+                style: TextStyle(color: Colors.white),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  IconButton(
+                    onPressed: () {
+                      _launchURL("hadishlabs@gmail.com", "Contact us ", "");
+                    },
+                    icon: Icon(
+                      LineAwesomeIcons.envelope,
+                      color: AppThemeData.AppYellow,
+                    ),
+                  ),
+                  SocialMediaButton.twitter(
+                    url: "https://twitter.com/xohady",
+                    size: 30,
+                    color: Colors.blue,
+                  ),
+                ],
+              ),
+            ),
+            Divider(
+              color: AppThemeData.AppGray,
+              thickness: 2,
+              height: 2,
+            ),
+            ListTile(
+              onTap: () {
+                share();
+              },
+              leading: Icon(
+                Icons.share,
+                color: AppThemeData.AppYellow,
+              ),
+              title: Text(
+                'شارك التطبيق ',
+                style: TextStyle(color: Colors.white),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_forward,
+                      color: AppThemeData.AppYellow,
+                    ),
+                    onPressed: () {
+                      share();
+                    },
+                  )
+                ],
+              ),
+            ),
+            Divider(
+              color: AppThemeData.AppGray,
+              thickness: 2,
+              height: 2,
+            ),
+            ListTile(
+              onTap: () {
                 LaunchReview.launch();
               },
-              child: const Text(
-                'Rate The App',
-                style:
-                    TextStyle(fontSize: 14, color: AppThemeData.PrimaryColor),
+              leading: Icon(
+                FontAwesomeIcons.googlePlay,
+                color: AppThemeData.AppYellow,
+              ),
+              title: Text(
+                'قيم التطبيق ',
+                style: TextStyle(color: Colors.white),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_forward,
+                      color: AppThemeData.AppYellow,
+                    ),
+                    onPressed: () {
+                     LaunchReview.launch();
+                    },
+                  )
+                ],
               ),
             ),
-          ),
-          Flexible(
-            child: RaisedButton(
-              color: AppThemeData.AppYellow,
-              onPressed: () {
-                _launchURL("hadishlabs@gmail.com", "Contact us ", "");
+            Divider(
+              color: AppThemeData.AppGray,
+              thickness: 2,
+              height: 2,
+            ),
+            ListTile(
+              onTap: () {
+                _paypal();
               },
-              child: const Text(
-                'Contact Us',
-                style:
-                    TextStyle(fontSize: 14, color: AppThemeData.PrimaryColor),
+              leading: Icon(
+                Icons.attach_money,
+                color: AppThemeData.AppYellow,
+              ),
+              title: Text(
+                'ادعم المطور',
+                style: TextStyle(color: Colors.white),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(FontAwesomeIcons.paypal, color: Colors.blue),
+                    onPressed: () async {
+                      _paypal();
+                    },
+                  )
+                ],
               ),
             ),
-          )
-        ],
+            Divider(
+              color: AppThemeData.AppGray,
+              thickness: 2,
+              height: 2,
+            ),
+            ListTile(
+              onTap: () {
+                _devNotes(context);
+              },
+              leading: Icon(
+                FontAwesomeIcons.dev,
+                color: AppThemeData.AppYellow,
+              ),
+              title: Text(
+                'ملاحظات المطور',
+                style: TextStyle(color: Colors.white),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.arrow_forward,
+                        color: AppThemeData.AppYellow),
+                    onPressed: () async {
+                      _devNotes(context);
+                    },
+                  )
+                ],
+              ),
+            ),
+            Divider(
+              color: AppThemeData.AppGray,
+              thickness: 2,
+              height: 2,
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+Future<void> _devNotes(context) async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: true, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('ملاحظات المطور'),
+        content: SingleChildScrollView(
+          child: FutureBuilder(
+            future: Notes.fetchNotes(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.data != null) {
+                List<Note> notes = snapshot.data.notes;
+                List<Widget> widgets = [];
+                TextStyle ts = TextStyle(fontSize: 16, color: Colors.black);
+                for (var i = 0; i < notes.length; i++) {
+                  widgets.add(Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Expanded(
+                        child: Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: Text(
+                            notes[i].text,
+                            style: ts,
+                            overflow: TextOverflow.visible,
+                          ),
+                        ),
+                      )
+                    ],
+                  ));
+                  widgets.add(SizedBox(
+                    height: 10,
+                  ));
+                }
+                return SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: widgets,
+                  ),
+                );
+              } else {
+                return Center(
+                  child: Container(
+                      height: 50,
+                      width: 50,
+                      child: CircularProgressIndicator(
+                        backgroundColor: AppThemeData.AppYellow,
+                      )),
+                );
+              }
+            },
+          ),
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('اوك'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+share() {
+  Share.share('https://jooz.page.link/u9DC',
+      subject:
+          "جوز - تلفاز عربي بدون اعلانات شاهد قنوات عربية بسرعة وجودة عالية مجانا ");
 }
 
 _launchURL(String toMailId, String subject, String body) async {
@@ -108,17 +388,16 @@ _launchURL(String toMailId, String subject, String body) async {
   }
 }
 
-save(String key, dynamic value) async {
-  final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-  if (value is bool) {
-    sharedPrefs.setBool(key, value);
-  } else if (value is String) {
-    sharedPrefs.setString(key, value);
-  } else if (value is int) {
-    sharedPrefs.setInt(key, value);
-  } else if (value is double) {
-    sharedPrefs.setDouble(key, value);
-  } else if (value is List<String>) {
-    sharedPrefs.setStringList(key, value);
+_paypal() async {
+  const url = "https://www.paypal.me/xohady";
+  if (await canLaunch(url))
+    launch(url);
+  else {
+    throw 'Could not launch $url';
   }
 }
+
+/*
+
+
+ */

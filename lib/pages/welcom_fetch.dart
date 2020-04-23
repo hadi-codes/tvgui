@@ -1,60 +1,67 @@
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tvgui/bloc/Channels/channels_bloc.dart';
+import 'package:tvgui/bloc/Page/page_bloc.dart';
 import 'package:tvgui/model/theme.dart';
-import 'package:tvgui/model/fetch_channels.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:tvgui/pages/errorPage.dart';
-import 'package:tvgui/pages/maintenancePage.dart';
-import 'package:tvgui/pages/updatePage.dart';
+import 'package:tvgui/pages/update.dart';
 import 'bottomNavBar.dart';
-
+import 'error.dart';
+import 'maintenance.dart';
 
 class WelcomFetch extends StatelessWidget {
   const WelcomFetch({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Welcome',
-      theme: appTheme(),
-      home: Scaffold(
-        body: Center(
-          child: FutureBuilder(
-            future: fetchServer(),
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              print(snapshot);
+    return BlocBuilder<ChannelsBloc, ChannelsState>(
+      builder: (context, state) {
+        if (state is Fetching) {
+          BlocProvider.of<ChannelsBloc>(context).add(FetchChannels());
+          return Scaffold(
 
-              if (snapshot.data == null) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Container(child: Image.asset('assets/img/logo.png')),
-                    Container(
-                        height: 30,
-                        child: LoadingIndicator(
-                          indicatorType: Indicator.ballPulseRise,
-                          color: AppThemeData.AppYellow,
-                        ))
-                  ],
-                );
-              } else if (snapshot.data == "maintenance") {
-                return Maintenance(msg:"maintenance mode ... we will back soon ." ,);
-              } else if (snapshot.data == "update") {
-               return UpdatePage(msg: "Please Upadate The App ..",);
-               
-              } 
-              else if (snapshot.data.runtimeType==  DioError ) {
-                return ErrorPage(errorMsg: snapshot.data.message,);
-              }
-              else
-                return BottomNavBar(
-                  //title: 'Home',
-                  cache: snapshot.data,
-                );
-            },
-          ),
-        ),
-      ),
+                      body: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Flexible(
+                    child: Container(child: Image.asset('assets/img/logo.png'))),
+                Flexible(
+                  child: Container(
+                      height: 30,
+                      child: LoadingIndicator(
+                        indicatorType: Indicator.ballPulseRise,
+                        color: AppThemeData.AppYellow,
+                      )),
+                )
+              ],
+            ),
+          );
+        }
+        if (state is Maintenance) {
+          return MaintenancePage(
+            msg: "maintenance mode ... we will back soon .",
+          );
+        }
+        if (state is ForceUpdate) {
+          return UpdatePage(
+            msg: "Please Upadate The App ..",
+          );
+        }
+        if (state is Error) {
+          return ErrorPage(
+            errorMsg: "error happened ",
+          );
+        }
+        if (state is Success)
+          return BottomNavBar(
+            //title: 'Home',
+            cache: state.list,
+            categories: state.category,
+            sortedByCoutry:state.sortedByCoutry,
+          );
+      },
     );
   }
 }

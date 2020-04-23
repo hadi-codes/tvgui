@@ -1,319 +1,416 @@
-import 'package:flag/flag.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_ijkplayer/flutter_ijkplayer.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tvgui/channelspls/channel.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
-// import 'package:auto_orientation/auto_orientation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:tvgui/model/theme.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tvgui/bloc/video/video_bloc.dart';
+import 'package:tvgui/db/db.dart';
+import 'package:tvgui/model/categories.dart';
+import 'package:tvgui/model/channel/channel.dart';
+import 'package:tvgui/model/notes.dart';
+import 'package:tvgui/model/settings.dart';
+import 'package:tvgui/widgets/better_video_player.dart';
+import 'package:tvgui/widgets/title_servers.dart';
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({
-    Key key,
-    this.title,
-    this.cache,
-  }) : super(key: key);
+import '../model/theme.dart';
 
-  final String title;
-  final List<Channel> cache;
-
-  String url;
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
+class Country {
+  String name;
+  String icon;
 }
 
-class _MyHomePageState extends State<MyHomePage>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
-  PageController _pageController;
-  Orientation get orientation => MediaQuery.of(context).orientation;
-  IjkMediaController mediaController = IjkMediaController();
-  bool playInBackground;
-  List _categories = [
-    // "Popular",
-    "News",
-    "Kids",
-    "Sport",
-    "Movies",
-    "Music",
-    "Classic",
-    "Entertaniment",
-    "Religion",
-    "Documentaries",
-    "Series"
-  ];
-  Widget topWidget;
-  Widget serversWidget;
+class Home extends StatefulWidget {
+  Home({Key key, this.cache, this.categories, this.sortedByCounty})
+      : super(key: key);
+  final List<Channel> cache;
+  final List<Category> categories;
+  final List<SortedByCountry> sortedByCounty;
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> with TickerProviderStateMixin {
+  ScrollController _scrollViewController;
+  bool _isUpBottomVisible = false;
   final List<Tab> tabs = <Tab>[];
+  final List<Tab> countryTabs = <Tab>[];
+  TabController _coutryTabController;
 
   TabController _tabController;
-
-  static const PrimaryColor = Color(0xff20232C);
-  static const AppColorYellow = Color(0xfffbdd33);
-  static const AppColorGray = Color(0xff74777f);
-
+  double position = 0.0;
+  double sensitivityFactor = 20.0;
+  List<Category> _categories;
+  List<SortedByCountry> _sortedByCountrt;
+  int favLength;
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
-    getSettings();
-    Wakelock.enable();
-
-    topWidget = pic();
-    serversWidget = Container();
-    var option1 = IjkOption(IjkOptionCategory.format, "fflags", "fastseek");
-
-    mediaController.setIjkPlayerOptions(
-      [TargetPlatform.iOS, TargetPlatform.android],
-      [option1].toSet(),
-    );
-
+    favLength = Db.getFavouriteChannels().length;
+    bool _isFirsTime = Db.getfirtTimeNotes();
+    _categories = widget.categories;
+    _sortedByCountrt = widget.sortedByCounty;
+    _scrollViewController = new ScrollController(initialScrollOffset: 0.0);
+    super.initState();
+    if (_isFirsTime == true) {
+      Db.setFirstTimeNotes(false);
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _devNotes(context);
+      });
+    }
     for (int index = 0; index < _categories.length; index++) {
       tabs.add(new Tab(
-        text: _categories[index],
+        child: Text(_categories[index].ar),
       ));
     }
-    _tabController = new TabController(vsync: this, length: tabs.length);
-    //BackButtonInterceptor.add(myInterceptor);
-    super.initState();
-    _pageController = PageController();
+
+    for (int index = 0; index < _sortedByCountrt.length; index++) {
+      countryTabs.add(new Tab(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Flexible(
+              child: CachedNetworkImage(
+                imageUrl: _sortedByCountrt[index].img,
+              ),
+            ),
+            Text(_sortedByCountrt[index].ar)
+          ],
+        ),
+        // text: _categories[index].ar,
+      ));
+    }
+    _tabController = new TabController(
+        vsync: this,
+        length: _categories.length,
+        initialIndex: favLength == 0 ? 1 : 0);
+    _coutryTabController = new TabController(
+        vsync: this,
+        length: _sortedByCountrt.length,
+        initialIndex: favLength == 0 ? 1 : 0);
   }
 
   @override
   void dispose() {
-    buildVideoPlayer();
-    // BackButtonInterceptor.remove(myInterceptor);
-    mediaController?.dispose();
-
     _tabController.dispose();
-    WidgetsBinding.instance.removeObserver(this);
-
+    _coutryTabController.dispose();
     super.dispose();
-    _pageController.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
-    print(state);
-    if (state == AppLifecycleState.paused && playInBackground == false) {
-      await mediaController.pause();
-    } else if (state == AppLifecycleState.resumed) {
-      mediaController.play();
-    }
-    print(playInBackground);
   }
 
   @override
   Widget build(BuildContext context) {
-    return new WillPopScope(
-      onWillPop: () => showDialog<bool>(
-        context: context,
-        builder: (c) => AlertDialog(
-          title: Text('Warning'),
-          content: Text('Do you really want to exit'),
-          actions: [
-            FlatButton(
-              child: Text('Yes'),
-              onPressed: () => Navigator.pop(c, true),
+    SortBy sortBy = Db.getSettings().sortBy;
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(0.0),
+        child: AppBar(),
+      ),
+      body: NotificationListener<ScrollUpdateNotification>(
+        onNotification: (ScrollNotification notification) {
+          setState(() {
+            if (notification.metrics.pixels - position >= sensitivityFactor &&
+                notification.metrics.axis == Axis.vertical) {
+              print('Axis Scroll Direction : Up');
+              position = notification.metrics.pixels;
+              _isUpBottomVisible = true;
+            }
+            if (position - notification.metrics.pixels >= sensitivityFactor &&
+                notification.metrics.axis == Axis.vertical) {
+              print('Axis Scroll Direction : Down');
+              _isUpBottomVisible = false;
+              position = notification.metrics.pixels;
+            }
+          });
+        },
+        child: NestedScrollView(
+          controller: _scrollViewController,
+          headerSliverBuilder: (BuildContext context, bool boxIsScrolled) {
+            return <Widget>[
+              SliverToBoxAdapter(child: BetterVideo()),
+              SliverToBoxAdapter(
+                child: TitleServers(),
+              ),
+              SliverToBoxAdapter(
+                  child: Divider(
+                thickness: 2,
+                color: AppThemeData.AppYellow,
+              )),
+              SliverToBoxAdapter(
+                  child: sortBy == SortBy.category
+                      ? _tabBarBuilder()
+                      : _countryTabBarBuilder()),
+              SliverToBoxAdapter(
+                  child: Divider(
+                thickness: 2,
+                color: AppThemeData.AppYellow,
+              )),
+            ];
+          },
+          body: TabBarView(
+              controller: sortBy == SortBy.category
+                  ? _tabController
+                  : _coutryTabController,
+              children: sortBy == SortBy.category
+                  ? _categories.map((Category category) {
+                      return new Container(
+                        child: _buildBody(category.en),
+                      );
+                    }).toList()
+                  : _sortedByCountrt.map((SortedByCountry country) {
+                      return new Container(
+                        child: _countrybuildBody(country.countryCode),
+                      );
+                    }).toList()),
+        ),
+      ),
+      floatingActionButton: _isUpBottomVisible
+          ? FloatingActionButton(
+              backgroundColor: AppThemeData.AppYellow,
+              child: Icon(Icons.arrow_upward),
+              onPressed: () {
+                _scrollViewController.animateTo(
+                    _scrollViewController.position.minScrollExtent,
+                    duration: Duration(milliseconds: 500),
+                    curve: Curves.easeIn);
+              },
+            )
+          : null,
+    );
+  }
+
+  Future<void> _devNotes(context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('ملاحظات المطور'),
+          content: SingleChildScrollView(
+            child: FutureBuilder(
+              future: Notes.fetchNotes(),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (snapshot.data != null) {
+                  List<Note> notes = snapshot.data.notes;
+                  List<Widget> widgets = [];
+                  TextStyle ts = TextStyle(fontSize: 16, color: Colors.black);
+                  for (var i = 0; i < notes.length; i++) {
+                    widgets.add(Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Expanded(
+                          child: Directionality(
+                            textDirection: TextDirection.rtl,
+                            child: Text(
+                              notes[i].text,
+                              style: ts,
+                              overflow: TextOverflow.visible,
+                            ),
+                          ),
+                        )
+                      ],
+                    ));
+                    widgets.add(SizedBox(
+                      height: 10,
+                    ));
+                  }
+                  return SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: widgets,
+                    ),
+                  );
+                } else {
+                  return Center(
+                    child: Container(
+                        height: 50,
+                        width: 50,
+                        child: CircularProgressIndicator(
+                          backgroundColor: AppThemeData.AppYellow,
+                        )),
+                  );
+                }
+              },
             ),
+          ),
+          actions: <Widget>[
             FlatButton(
-              child: Text('No'),
-              onPressed: () => Navigator.pop(c, false),
+              child: Text('اوك'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
           ],
-        ),
-      ),
-      child: Scaffold(
-        appBar: PreferredSize(
-            preferredSize: Size.fromHeight(10.0), // here the desired height
-            child: AppBar(
-                // ...
-                )),
-        body: Column(children: <Widget>[
-          AspectRatio(
-            aspectRatio: 1280 / 720,
-            child: topWidget,
-          ),
-          new Container(
-            //padding: const EdgeInsets.all(32.0),
-
-            //color: const Color(0xffDC1C17),
-
-            decoration: new BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: new BorderRadius.only(
-                topLeft: const Radius.circular(40.0),
-                topRight: const Radius.circular(40.0),
-                bottomLeft: const Radius.circular(40.0),
-                bottomRight: const Radius.circular(40.0),
-              ),
-            ),
-            child: new Container(
-                decoration: new BoxDecoration(
-                    color: AppThemeData.AppYellow,
-                    borderRadius: new BorderRadius.only(
-                      topLeft: const Radius.circular(40.0),
-                      topRight: const Radius.circular(40.0),
-                    )),
-                child: serversWidget),
-          ),
-          Flexible(
-
-              // this will host our Tab Views
-              child: new Scaffold(
-            appBar: PreferredSize(
-              preferredSize: Size.fromHeight(50.0),
-              child: AppBar(
-                elevation: 1.0,
-                bottom: new TabBar(
-                  isScrollable: true,
-                  unselectedLabelColor: AppColorGray,
-                  labelColor: AppColorYellow,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  indicator: new BubbleTabIndicator(
-                    indicatorHeight: 35.0,
-                    indicatorColor: PrimaryColor,
-                    tabBarIndicatorSize: TabBarIndicatorSize.tab,
-                  ),
-                  tabs: tabs,
-                  controller: _tabController,
-                ),
-              ),
-            ),
-            body: new TabBarView(
-              controller: _tabController,
-              children: tabs.map((Tab tab) {
-                return new Container(
-                  child: _buildBody(tab.text),
-                );
-              }).toList(),
-            ),
-          ))
-        ]),
-      ),
+        );
+      },
     );
   }
 
-  Widget pic() {
-    return Container(height: 200, child: Image.asset('assets/img/logo.png'));
-  }
-
-  Widget welecomMsg() {
-    return Container(
-        color: AppThemeData.AppGray,
-        height: 50,
-        width: 500,
-        child: Center(
-          child: Text("Hi This Is Wahlnut...",
-              style: TextStyle(color: AppThemeData.AppYellow, fontSize: 16)),
-        ));
-  }
-
-  getSettings() async {
-    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-    setState(() {
-      playInBackground = (sharedPrefs.getBool('playInBackground') ?? false);
-    });
-  }
-
-  Widget buildVideoPlayer() {
-    return Container(
-      height: 200,
-      child: IjkPlayer(
-        mediaController: mediaController,
-        controllerWidgetBuilder: (mediaController) {
-          return DefaultIJKControllerWidget(
-            horizontalGesture: false,
-            verticalGesture: false,
-            hideSystemBarOnFullScreen: true,
-            controller: mediaController,
-            doubleTapPlay: true,
-            onFullScreen: (bool onFull) {
-              if (onFull) {
-              } else {
-                // AutoOrientation.portraitUpMode();
+  Widget showDevNotes() {
+    return AlertDialog(
+      title: Text('ملاحظات المطور'),
+      content: SingleChildScrollView(
+        child: FutureBuilder(
+          future: Notes.fetchNotes(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.data != null) {
+              List<Note> notes = snapshot.data.notes;
+              List<Widget> widgets = [];
+              TextStyle ts = TextStyle(fontSize: 16, color: Colors.black);
+              for (var i = 0; i < notes.length; i++) {
+                widgets.add(Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: Text(
+                          notes[i].text,
+                          style: ts,
+                          overflow: TextOverflow.visible,
+                        ),
+                      ),
+                    )
+                  ],
+                ));
+                widgets.add(SizedBox(
+                  height: 10,
+                ));
               }
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  serversWidgets(List<Url> urls) {
-    List<Widget> list = [];
-
-    for (int i = 0; i < urls.length; i++) {
-      list.add(SizedBox(
-        width: 5,
-      ));
-      list.add(SizedBox(
-        width: 90,
-        child: RaisedButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: new BorderRadius.circular(18.0),
-          ),
-          child: Text(
-            'sever ${i + 1}',
-          ),
-          color: (urls[i].isOk) ? Colors.lightBlue : AppThemeData.Red,
-          onPressed: () {
-            setState(() {
-              topWidget = buildVideoPlayer();
-              mediaController.setNetworkDataSource(urls[i].url, autoPlay: true);
-            });
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: widgets,
+                ),
+              );
+            } else {
+              return Center(
+                child: Container(
+                    height: 50,
+                    width: 50,
+                    child: CircularProgressIndicator(
+                      backgroundColor: AppThemeData.AppYellow,
+                    )),
+              );
+            }
           },
         ),
-      ));
-      list.add(SizedBox(
-        width: 5,
-      ));
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('اوك'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _tabBarBuilder() {
+    return TabBar(
+      tabs: tabs,
+      controller: _tabController,
+      isScrollable: true,
+      unselectedLabelColor: AppThemeData.AppGray,
+      labelColor: AppThemeData.AppYellow,
+      indicatorSize: TabBarIndicatorSize.tab,
+      indicator: new BubbleTabIndicator(
+        indicatorHeight: 35.0,
+        indicatorColor: AppThemeData.PrimaryColor,
+        tabBarIndicatorSize: TabBarIndicatorSize.tab,
+      ),
+    );
+  }
+
+  Widget _countryTabBarBuilder() {
+    return TabBar(
+      tabs: countryTabs,
+      controller: _coutryTabController,
+      isScrollable: true,
+      unselectedLabelColor: AppThemeData.AppGray,
+      labelColor: AppThemeData.AppYellow,
+      indicatorSize: TabBarIndicatorSize.tab,
+      indicator: new BubbleTabIndicator(
+        indicatorHeight: 35.0,
+        indicatorColor: AppThemeData.PrimaryColor,
+        tabBarIndicatorSize: TabBarIndicatorSize.tab,
+      ),
+    );
+  }
+
+  Widget _countrybuildBody(String category) {
+    print(category);
+    if (category == "Favourite") {
+      List<Channel> list = Db.getFavouriteChannels();
+      return tileBuilder(list);
+    } else {
+      List<Channel> theCategory = [];
+
+      for (var i in widget.cache) {
+        if (category != null &&
+            category.toLowerCase() == i.countryCode.toString().toLowerCase()) {
+          theCategory.add(i);
+        }
+      }
+      return tileBuilder(theCategory);
     }
-    return list;
   }
 
   Widget _buildBody(String category) {
-    List<Channel> theCategory = [];
+    if (category == "Favourite") {
+      List<Channel> list = Db.getFavouriteChannels();
+      return tileBuilder(list);
+    } else {
+      List<Channel> theCategory = [];
 
-    for (var i in widget.cache) {
-      if (category.toLowerCase() == i.categories.toString().toLowerCase()) {
-        // print(i.categories);
-        theCategory.add(i);
+      for (var i in widget.cache) {
+        if (category.toLowerCase() == i.categories.toString().toLowerCase()) {
+          theCategory.add(i);
+        }
       }
+      return tileBuilder(theCategory);
     }
+  }
 
-
-    _serverWidgetBody(Channel channel) {
-      return ExpansionTile(
-        title: Text(channel.title),
-        trailing: Flags.getMiniFlag(channel.countryCode.toUpperCase(), 20, 20),
-        children: <Widget>[
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: serversWidgets(channel.urls),
-            ),
-          )
-        ],
-      );
-    }
-
+  Widget tileBuilder(List<Channel> theCategory) {
     return ListView.builder(
       itemCount: theCategory.length,
       itemBuilder: (BuildContext context, int index) {
+        bool isFav = Db.isInFavourite(theCategory[index]);
         return ListTile(
+          trailing: IconButton(
+            icon: Icon(
+              Icons.favorite,
+              color: isFav ? AppThemeData.AppYellow : AppThemeData.AppGray,
+            ),
+            onPressed: () {
+              setState(() {
+                if (isFav == true) {
+                  isFav = false;
+                  Db.deleteFormFavourite(theCategory[index]);
+                } else {
+                  isFav = true;
+                  Db.putToFavourite(theCategory[index]);
+                }
+              });
+            },
+          ),
           onTap: () {
             setState(() {
-              print(theCategory[index].urls[0].url);
-              print(theCategory[index].urls[0].isOk);
-              serversWidget = _serverWidgetBody(theCategory[index]);
-              topWidget = buildVideoPlayer();
-              mediaController.setNetworkDataSource(
-                  theCategory[index].urls[0].url,
-                  autoPlay: true);
+              _isUpBottomVisible = false;
             });
+            BlocProvider.of<VideoBloc>(context).add(Click(
+              channel: theCategory[index],
+            ));
+            _scrollViewController.animateTo(
+                _scrollViewController.position.minScrollExtent,
+                duration: Duration(milliseconds: 500),
+                curve: Curves.easeIn);
           },
           leading: CachedNetworkImage(
             imageUrl: theCategory[index].logo,
@@ -339,62 +436,4 @@ class _MyHomePageState extends State<MyHomePage>
       },
     );
   }
-
-  // Widget _buildBody(String category) {
-  //   final channelsBox = Hive.box('channels');
-
-  //   List<Channel> channels = [];
-
-  //   channelsBox.get(Channel);
-
-  //   for (var i = 0; i < channelsBox.length; i++) {
-  //     final channel = channelsBox.get(i) as Channel;
-  //     if (category.toLowerCase() ==
-  //         channel.categories.toString().toLowerCase()) {
-  //       // print(channel.categories);
-  //       channels.add(channel);
-  //     }
-  //   }
-
-  //   return ListView.builder(
-  //     itemCount: channels.length,
-  //     itemBuilder: (BuildContext context, int index) {
-  //       return ListTile(
-  //         onTap: () {
-  //           setState(() {
-  //             topWidget = BuildVideoPlayer();
-  //             // mediaController.setNetworkDataSource(channels[index].urls,
-  //             //     autoPlay: true);
-  //           });
-  //         },
-  //         leading: CachedNetworkImage(
-  //           imageUrl: channels[index].logo,
-  //           imageBuilder: (context, imageProvider) => Container(
-  //               child: CircleAvatar(
-  //             backgroundImage: imageProvider,
-  //             backgroundColor: PrimaryColor,
-  //           )),
-  //           placeholder: (context, url) => CircularProgressIndicator(),
-  //           errorWidget: (context, url, error) => Icon(Icons.broken_image),
-  //         ),
-  //         title: Text(
-  //           channels[index].title,
-  //           style: TextStyle(color: Colors.white),
-  //         ),
-  //         // trailing: Row(
-  //         //   mainAxisSize: MainAxisSize.min,
-  //         //   children: <Widget>[
-  //         //     IconButton(
-  //         //       icon: Icon(
-  //         //         Icons.favorite,
-  //         //         color: AppColorYellow,
-  //         //       ),
-  //         //       onPressed: () {},
-  //         //     ),
-  //         //   ],
-  //         // ),
-  //       );
-  //     },
-  //   );
-  // }
 }
