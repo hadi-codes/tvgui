@@ -100,6 +100,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    bool pinVideoPlayer = Db.getSettings().pinVideoPlayer;
     SortBy sortBy = Db.getSettings().sortBy;
     return Scaffold(
       appBar: PreferredSize(
@@ -123,45 +124,13 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             }
           });
         },
-        child: NestedScrollView(
-          controller: _scrollViewController,
-          headerSliverBuilder: (BuildContext context, bool boxIsScrolled) {
-            return <Widget>[
-              SliverToBoxAdapter(child: BetterVideo()),
-              SliverToBoxAdapter(
-                child: TitleServers(),
-              ),
-              SliverToBoxAdapter(
-                  child: Divider(
-                thickness: 2,
-                color: AppThemeData.AppYellow,
-              )),
-              SliverToBoxAdapter(
-                  child: sortBy == SortBy.category
-                      ? _tabBarBuilder()
-                      : _countryTabBarBuilder()),
-              SliverToBoxAdapter(
-                  child: Divider(
-                thickness: 2,
-                color: AppThemeData.AppYellow,
-              )),
-            ];
-          },
-          body: TabBarView(
-              controller: sortBy == SortBy.category
-                  ? _tabController
-                  : _coutryTabController,
-              children: sortBy == SortBy.category
-                  ? _categories.map((Category category) {
-                      return new Container(
-                        child: _buildBody(category.en),
-                      );
-                    }).toList()
-                  : _sortedByCountrt.map((SortedByCountry country) {
-                      return new Container(
-                        child: _countrybuildBody(country.countryCode),
-                      );
-                    }).toList()),
+        child: Column(
+          children: <Widget>[
+            pinVideoPlayer ? BetterVideo() : Container(height: 0,width: 0,),
+            Expanded(
+              child: nestedHomeView(sortBy,pinVideoPlayer),
+            ),
+          ],
         ),
       ),
       floatingActionButton: _isUpBottomVisible
@@ -436,4 +405,49 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       },
     );
   }
+
+  Widget nestedHomeView(SortBy sortBy, bool pinVideoPlayer) {
+    return NestedScrollView(
+      controller: _scrollViewController,
+      headerSliverBuilder: (BuildContext context, bool boxIsScrolled) {
+        return <Widget>[
+          pinVideoPlayer == false
+              ? SliverToBoxAdapter(child: BetterVideo())
+              : SliverToBoxAdapter(child: Container(height: 0,width: 0,)),
+          SliverToBoxAdapter(
+            child: TitleServers(),
+          ),
+          SliverToBoxAdapter(
+              child: Divider(
+            thickness: 2,
+            color: AppThemeData.AppYellow,
+          )),
+          SliverToBoxAdapter(
+              child: sortBy == SortBy.category
+                  ? _tabBarBuilder()
+                  : _countryTabBarBuilder()),
+          SliverToBoxAdapter(
+              child: Divider(
+            thickness: 2,
+            color: AppThemeData.AppYellow,
+          )),
+        ];
+      },
+      body: TabBarView(
+          controller:
+              sortBy == SortBy.category ? _tabController : _coutryTabController,
+          children: sortBy == SortBy.category
+              ? _categories.map((Category category) {
+                  return new Container(
+                    child: _buildBody(category.en),
+                  );
+                }).toList()
+              : _sortedByCountrt.map((SortedByCountry country) {
+                  return new Container(
+                    child: _countrybuildBody(country.countryCode),
+                  );
+                }).toList()),
+    );
+  }
+
 }

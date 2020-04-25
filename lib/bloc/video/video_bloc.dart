@@ -4,6 +4,7 @@ import 'package:better_player/better_player.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:tvgui/db/db.dart';
 import 'package:tvgui/model/channel/channel.dart';
 
 part 'video_event.dart';
@@ -14,15 +15,16 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
 
   Future<BetterPlayerController> play(String url) async {
     BetterPlayerConfiguration configuration = BetterPlayerConfiguration(
+        fullScreenByDefault: true,
+        allowedScreenSleep: false,
+        autoPlay: true,
+        looping: false,
         controlsConfiguration: BetterPlayerControlsConfiguration(
           liveText: "مباشر",
           liveTextColor: Colors.yellow,
           defaultErrorText: "حصل مشكلة في تشغيل القناة",
           controlBarColor: Colors.black26,
         ),
-        allowedScreenSleep: false,
-        autoPlay: true,
-        looping: false,
         eventListener: (listener) {
           print("lister herer.. ${listener.betterPlayerEventType.toString()}");
         });
@@ -56,6 +58,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
       yield PlayVideo(
           channel: event.channel,
           betterPlayerController: betterPlayerController);
+
       await betterPlayerController.play();
     }
 
@@ -67,6 +70,5 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
       yield ChangeServers(betterPlayerController: betterPlayerController);
       await betterPlayerController.play();
     }
-  
   }
 }

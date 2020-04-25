@@ -87,6 +87,78 @@ class _SettingsPageState extends State<SettingsPage> {
                 color: AppThemeData.AppYellow,
               ),
             ),
+             Divider(
+              color: AppThemeData.AppGray,
+              thickness: 2,
+              height: 2,
+            ),
+            SwitchListTile(
+              activeColor: AppThemeData.AppYellow,
+              inactiveThumbColor: AppThemeData.AppGray,
+              inactiveTrackColor: Colors.grey,
+              title: Text(
+                'تشغيل القنوات دائما في وضع الشاشة الكاملة',
+                style: TextStyle(color: Colors.white),
+              ),
+              value: settings.alwaysFullscreen,
+              onChanged: (bool value) {
+                setState(() {
+                  settings.alwaysFullscreen = value;
+                  print(value);
+                  Db.setSettings(settings);
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: value
+                          ? Text("تم تفعيل وضع الشاشة الكاملة")
+                          : Text("وضع الشاشة الكاملة غير مفعل"),
+                    ),
+                    duration: Duration(seconds: 2),
+                    backgroundColor: Colors.green,
+                  ));
+                });
+              },
+              secondary: const Icon(
+                Icons.play_circle_filled,
+                color: AppThemeData.AppYellow,
+              ),
+            ),
+            Divider(
+              color: AppThemeData.AppGray,
+              thickness: 2,
+              height: 2,
+            ),
+            SwitchListTile(
+              activeColor: AppThemeData.AppYellow,
+              inactiveThumbColor: AppThemeData.AppGray,
+              inactiveTrackColor: Colors.grey,
+              title: Text(
+                'تثبيت مشغل الفيديو في الاعلى',
+                style: TextStyle(color: Colors.white),
+              ),
+              value: settings.pinVideoPlayer,
+              onChanged: (bool value) {
+                setState(() {
+                  settings.pinVideoPlayer = value;
+                  print(value);
+                  Db.setSettings(settings);
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: value
+                          ? Text("تم تثيت المشغل")
+                          : Text("المشغل حر"),
+                    ),
+                    duration: Duration(seconds: 2),
+                    backgroundColor: Colors.green,
+                  ));
+                });
+              },
+              secondary: const Icon(
+                Icons.play_circle_filled,
+                color: AppThemeData.AppYellow,
+              ),
+            ),
             Divider(
               color: AppThemeData.AppGray,
               thickness: 2,
@@ -227,7 +299,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: AppThemeData.AppYellow,
                     ),
                     onPressed: () {
-                     LaunchReview.launch();
+                      LaunchReview.launch();
                     },
                   )
                 ],

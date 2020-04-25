@@ -10,6 +10,8 @@ enum SortBy {
 
 class Settings {
   bool playBackGround;
+  bool pinVideoPlayer;
+  bool alwaysFullscreen;
   SortBy sortBy;
-  Settings({this.playBackGround, this.sortBy});
+  Settings({this.playBackGround, this.sortBy,this.pinVideoPlayer,this.alwaysFullscreen});
 }

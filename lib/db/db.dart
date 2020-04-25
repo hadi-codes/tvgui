@@ -27,22 +27,35 @@ class Db {
     print("getting settting ");
     var box = Hive.box('settings');
     var playBackGround = box.get('playBackGround');
+    var pinVideoPlayer = box.get("pinVideoPlayer");
     SortBy sortBy = box.get("sortBy");
-
+    var alwayseFullscreen = box.get("fullscreen");
     if (playBackGround == null) {
       playBackGround = false;
     }
     if (sortBy == null) {
       sortBy = SortBy.category;
     }
+    if (pinVideoPlayer == null) {
+      pinVideoPlayer = false;
+    }
+    if (alwayseFullscreen == null) {
+      alwayseFullscreen = false;
+    }
     print(playBackGround);
-    return Settings(playBackGround: playBackGround, sortBy: sortBy);
+    return Settings(
+        playBackGround: playBackGround,
+        sortBy: sortBy,
+        pinVideoPlayer: pinVideoPlayer,
+        alwaysFullscreen: alwayseFullscreen);
   }
 
   static void setSettings(Settings settings) {
     print("updating settings");
     var box = Hive.box('settings');
     box.put("playBackGround", settings.playBackGround);
+    box.put("pinVideoPlayer", settings.pinVideoPlayer);
+    box.put("fullscreen", settings.alwaysFullscreen);
     box.put("sortBy", settings.sortBy);
   }
 //
