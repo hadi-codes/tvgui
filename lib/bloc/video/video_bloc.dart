@@ -27,14 +27,13 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
           print("lister herer.. ${listener.betterPlayerEventType.toString()}");
         });
 
-    BetterPlayerDataSource betterPlayerDataSource = new BetterPlayerDataSource(
+    BetterPlayerDataSource betterPlayerDataSource = BetterPlayerDataSource(
       BetterPlayerDataSourceType.NETWORK,
       url,
       liveStream: true,
     );
     betterPlayerController = new BetterPlayerController(configuration,
         betterPlayerDataSource: betterPlayerDataSource);
-    // await betterPlayerController.videoPlayerController.initialize();
     return betterPlayerController;
   }
 
@@ -45,28 +44,39 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
     yield NoVideo();
 
     if (event is Click) {
+      yield DisposeVideo();
+
+      await Future.delayed(const Duration(milliseconds: 500), () => "2 sec");
+
       print("event Click");
+      yield DisposeVideo();
 
-      print("click");
+      try {
+        this.betterPlayerController.dispose();
+      } catch (err) {
+        print(err);
+      }
       yield InintialVideo();
-
-      betterPlayerController = await play(event.channel.urls[0].url);
-      await Future.delayed(const Duration(seconds: 2), () => "2 sec");
+      this.betterPlayerController = await play(event.channel.urls[0].url);
 
       yield PlayVideo(
           channel: event.channel,
-          betterPlayerController: betterPlayerController);
-      await betterPlayerController.play();
+          betterPlayerController: this.betterPlayerController);
     }
 
     if (event is ChangeServer) {
+      await Future.delayed(const Duration(milliseconds: 500), () => "2 sec");
+      yield DisposeVideo();
+
+      try {
+        this.betterPlayerController.dispose();
+      } catch (err) {
+        print(err);
+      }
       yield InintialVideo();
-      betterPlayerController = await play(event.url);
-      await Future.delayed(const Duration(seconds: 2), () => "2 sec");
+      this.betterPlayerController = await play(event.url);
 
       yield ChangeServers(betterPlayerController: betterPlayerController);
-      await betterPlayerController.play();
     }
-  
   }
 }
