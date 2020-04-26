@@ -63,13 +63,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
 
       yield PlayVideo(
           channel: event.channel,
-<<<<<<< HEAD
           betterPlayerController: this.betterPlayerController);
-=======
-          betterPlayerController: betterPlayerController);
-
-      await betterPlayerController.play();
->>>>>>> c3b8cde5397b2202f5ff30562db707a440a5743f
     }
 
     if (event is ChangeServer) {
