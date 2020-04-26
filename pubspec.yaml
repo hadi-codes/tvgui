@@ -15,14 +15,12 @@ dependencies:
   http: ^0.12.0+2
   loading_indicator:
   auto_orientation: ^1.0.5
-  # flutter_ijkplayer: ^0.3.5+1
   bubble_tab_indicator: "^0.1.4"
   back_button_interceptor: ^4.2.3
   hive: ^1.3.0
   hive_flutter: ^0.3.0+1
   path_provider: ^1.5.1
   cached_network_image: ^2.0.0
-  # shared_preferences: ^0.5.6
   bottom_navy_bar: ^5.3.2
   dio: ^3.0.8
   package_info: ^0.4.0+13
@@ -40,7 +38,6 @@ dependencies:
   social_media_buttons: ^0.1.2
   line_awesome_icons: ^1.0.4+2
   share: ^0.6.3+6
-  line_icons: ^0.2.0
   font_awesome_flutter:
   flutter_svg: ^0.17.4
   flutter_beautiful_popup: ^1.5.0
