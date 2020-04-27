@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_beautiful_popup/main.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:line_awesome_icons/line_awesome_icons.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:share/share.dart';
 import 'package:social_media_buttons/social_media_button.dart';
+import 'package:tvgui/bloc/video/video_bloc.dart';
 import 'package:tvgui/db/db.dart';
 import 'package:tvgui/model/notes.dart';
 import 'package:tvgui/model/settings.dart';
 import 'package:tvgui/model/theme.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_beautiful_popup/templates/OrangeRocket.dart';
 
 class SettingsPage extends StatefulWidget {
   SettingsPage({
@@ -69,25 +68,29 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               value: settings.playBackGround,
               onChanged: (bool value) {
+                setState(() {
+                  BlocProvider.of<VideoBloc>(context).add(SettingChanged());
+
+                  settings.playBackGround = value;
+                  Db.setSettings(settings);
+                });
                 Scaffold.of(context).showSnackBar(SnackBar(
                   content: Directionality(
                     textDirection: TextDirection.rtl,
-                    child: Text("الخاصية غير مفعلة حاليا"),
+                    child: value
+                        ? Text(" تم تفعيل الخاصية")
+                        : Text("تم ايقاف الخاصية"),
                   ),
                   duration: Duration(seconds: 2),
-                  backgroundColor: Colors.red,
+                  backgroundColor: Colors.green,
                 ));
-                // setState(() {
-                //   settings.playBackGround = value;
-                // });
-                // Db.setSettings(settings);
               },
               secondary: const Icon(
                 Icons.play_circle_filled,
                 color: AppThemeData.AppYellow,
               ),
             ),
-             Divider(
+            Divider(
               color: AppThemeData.AppGray,
               thickness: 2,
               height: 2,
@@ -103,6 +106,7 @@ class _SettingsPageState extends State<SettingsPage> {
               value: settings.alwaysFullscreen,
               onChanged: (bool value) {
                 setState(() {
+                  BlocProvider.of<VideoBloc>(context).add(SettingChanged());
                   settings.alwaysFullscreen = value;
                   print(value);
                   Db.setSettings(settings);
@@ -139,15 +143,15 @@ class _SettingsPageState extends State<SettingsPage> {
               value: settings.pinVideoPlayer,
               onChanged: (bool value) {
                 setState(() {
+                  BlocProvider.of<VideoBloc>(context).add(SettingChanged());
+
                   settings.pinVideoPlayer = value;
                   print(value);
                   Db.setSettings(settings);
                   Scaffold.of(context).showSnackBar(SnackBar(
                     content: Directionality(
                       textDirection: TextDirection.rtl,
-                      child: value
-                          ? Text("تم تثيت المشغل")
-                          : Text("المشغل حر"),
+                      child: value ? Text("تم تثيت المشغل") : Text("المشغل حر"),
                     ),
                     duration: Duration(seconds: 2),
                     backgroundColor: Colors.green,

@@ -10,6 +10,8 @@ class Config {
   bool fourceUpdate;
   bool maintenance;
   String msg;
+  String searchApp;
+  String searchToken;
   List<Category> categories;
   List<SortedByCountry> sortedByCountry;
   Config({
@@ -19,6 +21,8 @@ class Config {
     this.msg,
     this.categories,
     this.sortedByCountry,
+    this.searchApp,
+    this.searchToken,
   });
 
   factory Config.fromJson(Map<String, dynamic> json) => Config(
@@ -26,6 +30,8 @@ class Config {
         fourceUpdate: json["fourceUpdate"],
         maintenance: json["maintenance"],
         msg: json["msg"],
+        searchApp: json["searchApp"],
+        searchToken: json["searchToken"],
         categories: List<Category>.from(
             json["categories"].map((x) => Category.fromJson(x))),
         sortedByCountry: List<SortedByCountry>.from(
@@ -37,6 +43,8 @@ class Config {
         "fourceUpdate": fourceUpdate,
         "maintenance": maintenance,
         "msg": msg,
+        "searchApp": searchApp,
+        "searchToken": searchToken,
         "categories": List<dynamic>.from(categories.map((x) => x.toJson())),
         "sortedByCountry":
             List<dynamic>.from(sortedByCountry.map((x) => x.toJson())),

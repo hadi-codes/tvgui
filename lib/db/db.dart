@@ -34,7 +34,7 @@ class Db {
       playBackGround = false;
     }
     if (sortBy == null) {
-      sortBy = SortBy.category;
+      sortBy = SortBy.country;
     }
     if (pinVideoPlayer == null) {
       pinVideoPlayer = false;
@@ -117,25 +117,32 @@ class Db {
   //
   // Config Database =
   static void putConfig(Config config) {
+    print("updateing config");
     final _configBox = Hive.box("config");
     _configBox.put("channelsVersion", config.channelsVersion);
     _configBox.put("msg", config.msg);
     _configBox.put("fourceUpdate", config.fourceUpdate);
     _configBox.put("maintenance", config.maintenance);
+    _configBox.put("searchApp", config.searchApp);
+    _configBox.put("searchToken", config.searchToken);
   }
 
   static Config getConfig() {
+    print("getting Config");
     final _configBox = Hive.box("config");
     int channelsVersion = _configBox.get("channelsVersion");
     String msg = _configBox.get("msg");
     bool fourceUpdate = _configBox.get("fourceUpdate");
     bool maintenance = _configBox.get("maintenance");
+    String searchApp = _configBox.get("searchApp");
+    String searchToken = _configBox.get("searchToken");
     return Config(
-      maintenance: maintenance,
-      fourceUpdate: fourceUpdate,
-      channelsVersion: channelsVersion,
-      msg: msg,
-    );
+        maintenance: maintenance,
+        fourceUpdate: fourceUpdate,
+        channelsVersion: channelsVersion,
+        msg: msg,
+        searchApp: searchApp,
+        searchToken: searchToken);
   }
 
   static Future<bool> isFirstTime() async {

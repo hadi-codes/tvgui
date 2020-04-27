@@ -126,9 +126,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         },
         child: Column(
           children: <Widget>[
-            pinVideoPlayer ? BetterVideo() : Container(height: 0,width: 0,),
+            pinVideoPlayer
+                ? BetterVideo()
+                : Container(
+                    height: 0,
+                    width: 0,
+                  ),
             Expanded(
-              child: nestedHomeView(sortBy,pinVideoPlayer),
+              child: nestedHomeView(sortBy, pinVideoPlayer),
             ),
           ],
         ),
@@ -217,68 +222,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     );
   }
 
-  Widget showDevNotes() {
-    return AlertDialog(
-      title: Text('ملاحظات المطور'),
-      content: SingleChildScrollView(
-        child: FutureBuilder(
-          future: Notes.fetchNotes(),
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (snapshot.data != null) {
-              List<Note> notes = snapshot.data.notes;
-              List<Widget> widgets = [];
-              TextStyle ts = TextStyle(fontSize: 16, color: Colors.black);
-              for (var i = 0; i < notes.length; i++) {
-                widgets.add(Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Expanded(
-                      child: Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: Text(
-                          notes[i].text,
-                          style: ts,
-                          overflow: TextOverflow.visible,
-                        ),
-                      ),
-                    )
-                  ],
-                ));
-                widgets.add(SizedBox(
-                  height: 10,
-                ));
-              }
-              return SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: widgets,
-                ),
-              );
-            } else {
-              return Center(
-                child: Container(
-                    height: 50,
-                    width: 50,
-                    child: CircularProgressIndicator(
-                      backgroundColor: AppThemeData.AppYellow,
-                    )),
-              );
-            }
-          },
-        ),
-      ),
-      actions: <Widget>[
-        FlatButton(
-          child: Text('اوك'),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
-    );
-  }
 
   Widget _tabBarBuilder() {
     return TabBar(
@@ -391,7 +334,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             placeholder: (context, url) => CircularProgressIndicator(),
             errorWidget: (context, url, error) => CircleAvatar(
               child: Icon(
-                Icons.broken_image,
+                Icons.live_tv,
                 color: AppThemeData.AppGray,
               ),
               backgroundColor: Colors.white,
@@ -399,7 +342,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
           title: Text(
             theCategory[index].title,
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white,fontSize: 18),
+          ),
+          subtitle: Text(
+            theCategory[index].enName,
+            style: TextStyle(color: Colors.white,fontSize: 12),
           ),
         );
       },
@@ -413,7 +360,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         return <Widget>[
           pinVideoPlayer == false
               ? SliverToBoxAdapter(child: BetterVideo())
-              : SliverToBoxAdapter(child: Container(height: 0,width: 0,)),
+              : SliverToBoxAdapter(
+                  child: Container(
+                  height: 0,
+                  width: 0,
+                )),
           SliverToBoxAdapter(
             child: TitleServers(),
           ),
@@ -449,5 +400,4 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 }).toList()),
     );
   }
-
 }

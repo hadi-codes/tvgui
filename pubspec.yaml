@@ -17,7 +17,7 @@ dependencies:
   auto_orientation: ^1.0.5
   bubble_tab_indicator: "^0.1.4"
   back_button_interceptor: ^4.2.3
-  hive: ^1.3.0
+  hive: ^1.4.1+1
   hive_flutter: ^0.3.0+1
   path_provider: ^1.5.1
   cached_network_image: ^2.0.0
@@ -41,6 +41,7 @@ dependencies:
   font_awesome_flutter:
   flutter_svg: ^0.17.4
   flutter_beautiful_popup: ^1.5.0
+  algolia: ^0.1.7
 
 
 dev_dependencies:

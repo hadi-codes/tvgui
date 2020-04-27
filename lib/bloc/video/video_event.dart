@@ -22,3 +22,27 @@ class ChangeServer extends VideoEvent {
   @override
   List<Object> get props => [url];
 }
+
+class SettingChanged extends VideoEvent {
+  @override
+  const SettingChanged();
+
+  @override
+  List<Object> get props => [];
+}
+
+class PlayInBack extends VideoEvent {
+  @override
+  const PlayInBack();
+
+  @override
+  List<Object> get props => [];
+}
+
+class StopInBack extends VideoEvent {
+  @override
+  const StopInBack();
+
+  @override
+  List<Object> get props => [];
+}

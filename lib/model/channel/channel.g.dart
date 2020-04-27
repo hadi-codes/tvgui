@@ -23,13 +23,14 @@ class ChannelAdapter extends TypeAdapter<Channel> {
       countryCode: fields[3] as String,
       urls: (fields[4] as List)?.cast<Url>(),
       channelId: fields[5] as String,
+      enName: fields[6] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Channel obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class ChannelAdapter extends TypeAdapter<Channel> {
       ..writeByte(4)
       ..write(obj.urls)
       ..writeByte(5)
-      ..write(obj.channelId);
+      ..write(obj.channelId)
+      ..writeByte(6)
+      ..write(obj.enName);
   }
 }
 

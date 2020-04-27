@@ -1,3 +1,4 @@
+import 'package:algolia/algolia.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
@@ -19,6 +20,8 @@ class Channel {
   List<Url> urls;
   @HiveField(5)
   String channelId;
+  @HiveField(6)
+  String enName;
 
   Channel(
       {this.title,
@@ -26,7 +29,8 @@ class Channel {
       this.categories,
       this.countryCode,
       this.urls,
-      this.channelId});
+      this.channelId,
+      this.enName});
 
   factory Channel.fromJson(Map<String, dynamic> json) {
     var list = json['urls'] as List;
@@ -37,6 +41,21 @@ class Channel {
       logo: json['logo'] as String,
       categories: json['categories'] as String,
       countryCode: json['countryCode'] as String,
+      enName: json['enName'] as String,
+      urls: urlsList,
+    );
+  }
+
+  factory Channel.fromAlgolia(AlgoliaObjectSnapshot doc) {
+    var list = doc.data['urls'] as List;
+    List<Url> urlsList = list.map((i) => Url.fromJson(i)).toList();
+    return Channel(
+      channelId: doc.data['_id'] as String,
+      title: doc.data['title'] as String,
+      logo: doc.data['logo'] as String,
+      categories: doc.data['categories'] as String,
+      countryCode: doc.data['countryCode'] as String,
+      enName: doc.data['enName'] as String,
       urls: urlsList,
     );
   }

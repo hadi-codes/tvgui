@@ -60,6 +60,8 @@ class ChannelsBloc extends Bloc<ChannelsEvent, ChannelsState> {
             serverConfig.maintenance == false) {
           print("no update on db");
           List<Channel> list = Db.getChannels();
+          Db.putConfig(serverConfig);
+
           print(list);
           yield Success(
               list: list,

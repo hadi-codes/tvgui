@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:tvgui/bloc/video/video_bloc.dart';
+import 'package:tvgui/db/db.dart';
 import 'package:tvgui/model/theme.dart';
 
 class BetterVideo extends StatefulWidget {
@@ -13,18 +14,28 @@ class BetterVideo extends StatefulWidget {
 class _BetterVideoState extends State<BetterVideo> with WidgetsBindingObserver {
   Orientation get orientation => MediaQuery.of(context).orientation;
   //bool playInBackground = Db.getSettings().playBackGround;
- 
+
   AppLifecycleState _notification;
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // setState(() {
-    //   _notification = state;
+    setState(() {
+      bool _playInBackGround = Db.getSettings().playBackGround;
+      _notification = state;
 
-    //   print(_notification);
-    //   if (_notification == AppLifecycleState.paused) {
-    //   }
-    //   if (_notification == AppLifecycleState.resumed) {}
-    // });
+      print(_notification);
+      if (_notification == AppLifecycleState.paused) {
+        if (_playInBackGround == true) {
+          BlocProvider.of<VideoBloc>(context).add(PlayInBack());
+        } else {
+          BlocProvider.of<VideoBloc>(context).add(StopInBack());
+        }
+      }
+      if (_notification == AppLifecycleState.resumed) {
+        if (_playInBackGround == false) {
+          BlocProvider.of<VideoBloc>(context).add(PlayInBack());
+        }
+      }
+    });
   }
 
   @override
@@ -45,14 +56,14 @@ class _BetterVideoState extends State<BetterVideo> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return BlocBuilder<VideoBloc, VideoState>(
       builder: (context, state) {
+        print("${state} state is");
         if (state is VideoInitial) {
           return Container(
             height: 200,
             child: new Center(child: Image.asset('assets/img/logo.png')),
           );
         }
-        if (state is InintialVideo ) {
-  
+        if (state is InintialVideo) {
           return SizedBox(
             height: 200,
             child: Center(
@@ -79,8 +90,7 @@ class _BetterVideoState extends State<BetterVideo> with WidgetsBindingObserver {
             ),
           );
         }
-          if (state is DisposeVideo ) {
-  
+        if (state is DisposeVideo) {
           return SizedBox(
             height: 200,
             child: Center(
@@ -108,7 +118,6 @@ class _BetterVideoState extends State<BetterVideo> with WidgetsBindingObserver {
           );
         }
         if (state is PlayVideo) {
-        
           return video(state.betterPlayerController);
         }
         if (state is ChangeServers) {
@@ -125,7 +134,6 @@ class _BetterVideoState extends State<BetterVideo> with WidgetsBindingObserver {
   }
 
   Widget video(BetterPlayerController betterPlayerController) {
-
     if (orientation == Orientation.landscape) {
       return Center(
         child: AspectRatio(

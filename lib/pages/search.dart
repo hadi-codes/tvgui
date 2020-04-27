@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:algolia/algolia.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +10,7 @@ import 'package:tvgui/bloc/Page/page_bloc.dart';
 import 'package:tvgui/bloc/video/video_bloc.dart';
 import 'package:tvgui/db/db.dart';
 import 'package:tvgui/model/channel/channel.dart';
+import 'package:tvgui/model/config.dart';
 import 'package:tvgui/model/theme.dart';
 
 import 'package:http/http.dart' as http;
@@ -22,7 +24,16 @@ class SearchPage extends StatefulWidget {
   _SearchPageState createState() => _SearchPageState();
 }
 
+class Application {
+  static final Algolia algolia = Algolia.init(
+    applicationId: Db.getConfig().searchApp,
+    apiKey: Db.getConfig().searchToken,
+  );
+}
+
 class _SearchPageState extends State<SearchPage> {
+  Algolia algolia = Application.algolia;
+  Config config;
   final TextEditingController _filter = new TextEditingController();
   final dio = new Dio();
   String _searchText = "";
@@ -49,6 +60,7 @@ class _SearchPageState extends State<SearchPage> {
   }
   @override
   void initState() {
+    config = Db.getConfig();
     this._getChannels();
     super.initState();
   }
@@ -88,7 +100,7 @@ class _SearchPageState extends State<SearchPage> {
         bool isFav = Db.isInFavourite(channels[index]);
 
         return ListTile(
-          trailing:  IconButton(
+          trailing: IconButton(
             icon: Icon(
               Icons.favorite,
               color: isFav ? AppThemeData.AppYellow : AppThemeData.AppGray,
@@ -103,7 +115,6 @@ class _SearchPageState extends State<SearchPage> {
                   Db.putToFavourite(channels[index]);
                 }
               });
-
             },
           ),
           onTap: () {
@@ -122,7 +133,7 @@ class _SearchPageState extends State<SearchPage> {
             placeholder: (context, url) => CircularProgressIndicator(),
             errorWidget: (context, url, error) => CircleAvatar(
               child: Icon(
-                Icons.broken_image,
+                Icons.live_tv,
                 color: AppThemeData.AppGray,
               ),
               backgroundColor: Colors.white,
@@ -130,7 +141,11 @@ class _SearchPageState extends State<SearchPage> {
           ),
           title: Text(
             channels[index].title,
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+          subtitle: Text(
+            channels[index].enName,
+            style: TextStyle(color: Colors.white, fontSize: 12),
           ),
         );
       },
@@ -164,27 +179,20 @@ class _SearchPageState extends State<SearchPage> {
 
   void _getChannels() async {
     print("getting Channels");
-    // final response = await dio
-    //     .post('https://api.hadi.wtf/search', data: {"name": _searchText});
-    List<Channel> tempList = new List<Channel>();
 
-    tempList = await fetchChannels(http.Client(), _searchText);
+    List<Channel> tempList = new List<Channel>();
+    AlgoliaQuery query = algolia.instance.index('channels').search(_searchText);
+
+    query = query.setHitsPerPage(10);
+    AlgoliaQuerySnapshot snap = await query.getObjects();
+
+    print('Hits count: ${snap.hits}');
+
+    tempList =
+        snap.hits.map<Channel>((doc) => Channel.fromAlgolia(doc)).toList();
     setState(() {
       channels = tempList;
       filteredChannels = channels;
     });
   }
-}
-
-Future<List<Channel>> fetchChannels(
-    http.Client client, String searchText) async {
-  final response = await client
-      .post('https://api.hadi.wtf/search', body: {"name": searchText});
-
-  return compute(parseChannels, response.body);
-}
-
-List<Channel> parseChannels(String responseBody) {
-  final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
-  return parsed.map<Channel>((json) => Channel.fromJson(json)).toList();
 }
